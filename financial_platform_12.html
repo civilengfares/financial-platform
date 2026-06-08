@@ -1,0 +1,2604 @@
+<!DOCTYPE html>
+<html lang="ar" dir="ltr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Financial Platform | منصة الحسابات</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.7.0/dist/tabler-icons.min.css"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f5f5f3;color:#1a1a18;font-size:13px}
+.app{display:flex;flex-direction:column;min-height:100vh}
+.topbar{background:#fff;border-bottom:0.5px solid #ddd;padding:0 20px;display:flex;align-items:center;justify-content:space-between;height:52px;position:sticky;top:0;z-index:100}
+.topbar-title{font-size:15px;font-weight:500;display:flex;align-items:center;gap:8px}
+.topbar-sub{font-size:11px;color:#888}
+.main{display:flex;flex:1}
+.sidebar{width:200px;background:#fff;border-right:0.5px solid #ddd;padding:12px 8px;position:sticky;top:52px;height:calc(100vh - 52px);overflow-y:auto;flex-shrink:0}
+.nav-item{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:7px;cursor:pointer;color:#555;font-size:12px;margin-bottom:2px;border:none;background:none;width:100%;text-align:left}
+.nav-item:hover{background:#f0f0ee}
+.nav-item.active{background:#EBF2FB;color:#185FA5;font-weight:500}
+.nav-item .ti{font-size:15px;flex-shrink:0}
+.nav-label{display:flex;flex-direction:column;line-height:1.2}
+.nav-label .en{font-size:12px}
+.nav-label .ar{font-size:10px;color:#999;margin-top:1px}
+.nav-item.active .nav-label .ar{color:#5a9fd4}
+.content{flex:1;padding:20px;max-width:1100px}
+.page{display:none}.page.active{display:block}
+.page-header{margin-bottom:16px;display:flex;justify-content:space-between;align-items:flex-start}
+.page-title{font-size:17px;font-weight:500}
+.page-title .ar{font-size:11px;color:#888;font-weight:400;margin-top:2px}
+.metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:16px}
+.metric{background:#fff;border:0.5px solid #e8e8e5;border-radius:10px;padding:12px 14px}
+.metric .lbl{font-size:10px;color:#888;margin-bottom:3px;text-transform:uppercase;letter-spacing:.4px}
+.metric .lbl .ar{font-size:10px;color:#aaa;font-style:italic}
+.metric .val{font-size:19px;font-weight:500;font-variant-numeric:tabular-nums}
+.val.green{color:#1D9E75}.val.red{color:#D85A30}.val.blue{color:#185FA5}
+.card{background:#fff;border:0.5px solid #e8e8e5;border-radius:10px;padding:14px 16px;margin-bottom:10px}
+.toolbar{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;align-items:center}
+.toolbar input,.toolbar select{padding:6px 10px;border:0.5px solid #ddd;border-radius:7px;font-size:12px;background:#fff;color:#1a1a18;height:32px;font-family:inherit}
+.toolbar input{flex:1;min-width:140px}
+.btn{display:inline-flex;align-items:center;gap:5px;padding:5px 12px;border:0.5px solid #ccc;border-radius:7px;font-size:12px;background:#fff;color:#333;cursor:pointer;height:32px;white-space:nowrap;font-family:inherit}
+.btn:hover{background:#f5f5f3}
+.btn.primary{background:#185FA5;color:#fff;border-color:#185FA5}
+.btn.primary:hover{background:#0C447C}
+.btn.sm{height:26px;padding:3px 8px;font-size:11px}
+.btn.danger{background:#FCEBEB;color:#791F1F;border-color:#F09595}
+.tbl-wrap{overflow-x:auto;border-radius:8px;border:0.5px solid #e8e8e5}
+table{width:100%;border-collapse:collapse;font-size:12px;background:#fff}
+th{text-align:left;padding:7px 10px;background:#fafaf8;color:#888;font-weight:500;font-size:10px;text-transform:uppercase;letter-spacing:.3px;border-bottom:0.5px solid #eee;white-space:nowrap}
+th .ar{font-size:10px;color:#bbb;text-transform:none;letter-spacing:0}
+td{padding:7px 10px;border-bottom:0.5px solid #f0f0ee;color:#1a1a18;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:#fafaf8}
+.badge{display:inline-block;padding:2px 7px;border-radius:8px;font-size:10px;font-weight:500;white-space:nowrap}
+.b-paid{background:#EAF3DE;color:#27500A}
+.b-pending{background:#FAEEDA;color:#633806}
+.b-cancelled{background:#F1EFE8;color:#5F5E5A}
+.b-partial{background:#E8F0FE;color:#1A56A0}
+.b-equipment{background:#E6F1FB;color:#0C447C}
+.b-labor{background:#E1F5EE;color:#085041}
+.b-admin{background:#FAEEDA;color:#633806}
+.b-vat{background:#FBEAF0;color:#72243E}
+.b-running{background:#F1EFE8;color:#5F5E5A}
+.b-other{background:#F1EFE8;color:#5F5E5A}
+.proj-card{background:#fff;border:0.5px solid #e8e8e5;border-radius:10px;padding:12px 14px;margin-bottom:8px;cursor:pointer;transition:border-color .15s}
+.proj-card:hover{border-color:#aaa}
+.proj-hdr{display:flex;justify-content:space-between;align-items:flex-start}
+.proj-name{font-size:13px;font-weight:500}
+.proj-sub{font-size:10px;color:#888;margin-top:2px}
+.proj-nums{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px;padding-top:10px;border-top:0.5px solid #eee}
+.pnl{font-size:10px;color:#888;text-transform:uppercase;letter-spacing:.3px}
+.pnl .ar{font-size:9px;color:#bbb;text-transform:none}
+.pnv{font-size:13px;font-weight:500;margin-top:2px;font-variant-numeric:tabular-nums}
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:200;align-items:center;justify-content:center}
+.modal-overlay.open{display:flex}
+.modal{background:#fff;border-radius:12px;padding:20px;width:520px;max-width:95vw;max-height:90vh;overflow-y:auto}
+.modal h3{font-size:14px;font-weight:500;margin-bottom:14px;display:flex;align-items:center;gap:6px}
+.modal h3 .ar{font-size:11px;color:#888;font-weight:400}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:4px}
+.fg{display:flex;flex-direction:column;gap:3px}
+.fg.full{grid-column:1/-1}
+.fg label{font-size:10px;color:#888;text-transform:uppercase;letter-spacing:.3px}
+.fg label .ar{font-size:10px;color:#bbb;text-transform:none;letter-spacing:0}
+.fg input,.fg select,.fg textarea{padding:7px 10px;border:0.5px solid #ddd;border-radius:7px;font-size:12px;background:#fff;color:#1a1a18;font-family:inherit}
+.fg textarea{resize:vertical;min-height:60px}
+.form-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:14px}
+.stmnt-row{display:flex;justify-content:space-between;padding:6px 0;border-bottom:0.5px solid #f0f0ee;font-size:12px}
+.stmnt-row:last-child{border-bottom:none}
+.stmnt-row.total{font-weight:500;font-size:14px;padding-top:10px;margin-top:4px;border-top:1px solid #ddd;border-bottom:none}
+.stmnt-lbl .ar{font-size:10px;color:#aaa;display:block;margin-top:1px}
+.chart-wrap{position:relative;width:100%;height:240px;margin:12px 0 6px}
+.section-sep{font-size:10px;font-weight:500;color:#888;text-transform:uppercase;letter-spacing:.4px;margin:16px 0 8px;display:flex;align-items:center;gap:6px}
+.section-sep .ar{font-size:10px;color:#bbb;text-transform:none;letter-spacing:0;font-weight:400}
+.empty{padding:20px;text-align:center;color:#aaa;font-size:12px}
+.vat-summary{background:#fafaf8;border:0.5px solid #eee;border-radius:10px;padding:14px;margin-bottom:14px}
+.hint{font-size:10px;color:#aaa;margin-top:6px;font-style:italic}
+@media(max-width:700px){.sidebar{display:none}.content{padding:12px}}
+
+.combo-wrap{position:relative;display:flex;flex-direction:column;gap:3px}
+.combo-wrap select{padding:7px 10px;border:0.5px solid #ddd;border-radius:7px;font-size:12px;background:#fff;color:#1a1a18;font-family:inherit}
+.combo-wrap input.combo-free{padding:7px 10px;border:0.5px solid #185FA5;border-radius:7px;font-size:12px;background:#EBF2FB;color:#1a1a18;font-family:inherit;margin-top:3px}
+</style>
+</head>
+<body>
+<div class="app">
+
+<div class="topbar">
+  <div class="topbar-title">
+    <i class="ti ti-chart-bar" style="color:#185FA5;font-size:18px"></i>
+    Financial Platform
+    <span class="topbar-sub">منصة الحسابات</span>
+  </div>
+  <div style="display:flex;gap:8px;align-items:center">
+    <span id="topbar-counts" style="font-size:11px;color:#888"></span>
+    <button class="btn primary sm" onclick="showForm('income')"><i class="ti ti-plus"></i> Invoice <span style="font-size:10px;opacity:.8">فاتورة</span></button>
+    <button class="btn sm" onclick="showForm('expense')"><i class="ti ti-plus"></i> Expense <span style="font-size:10px;opacity:.8">مصروف</span></button>
+  </div>
+</div>
+
+<div class="main">
+<div class="sidebar">
+  <div style="font-size:10px;color:#bbb;padding:4px 10px 8px;text-transform:uppercase;letter-spacing:.4px">Menu · القائمة</div>
+  <button class="nav-item active" onclick="showPage('capital',this)">
+    <i class="ti ti-building-bank"></i>
+    <div class="nav-label"><div class="en">Capital</div><div class="ar">رأس المال والتوزيعات</div></div>
+  </button>
+  <button class="nav-item" onclick="showPage('overview',this)">
+    <i class="ti ti-layout-dashboard"></i>
+    <div class="nav-label"><div class="en">Overview</div><div class="ar">نظرة عامة</div></div>
+  </button>
+  <button class="nav-item" onclick="showPage('projects',this)">
+    <i class="ti ti-building"></i>
+    <div class="nav-label"><div class="en">Projects</div><div class="ar">المشاريع والعملاء</div></div>
+  </button>
+  <button class="nav-item" onclick="showPage('income',this)">
+    <i class="ti ti-arrow-up-right"></i>
+    <div class="nav-label"><div class="en">Income</div><div class="ar">الإيرادات / الفواتير</div></div>
+  </button>
+  <button class="nav-item" onclick="showPage('expenses',this)">
+    <i class="ti ti-arrow-down-left"></i>
+    <div class="nav-label"><div class="en">Expenses</div><div class="ar">المصروفات</div></div>
+  </button>
+  <button class="nav-item" onclick="showPage('monthly',this)">
+    <i class="ti ti-calendar-stats"></i>
+    <div class="nav-label"><div class="en">Monthly</div><div class="ar">التقرير الشهري</div></div>
+  </button>
+  <button class="nav-item" onclick="showPage('purchases',this)">
+    <i class="ti ti-shopping-cart"></i>
+    <div class="nav-label"><div class="en">Purchases</div><div class="ar">المشتريات</div></div>
+  </button>
+  <button class="nav-item" onclick="showPage('vat',this)">
+    <i class="ti ti-receipt-tax"></i>
+    <div class="nav-label"><div class="en">VAT</div><div class="ar">ضريبة القيمة المضافة</div></div>
+  </button>
+  <button class="nav-item" onclick="showPage('statement',this)">
+    <i class="ti ti-file-text"></i>
+    <div class="nav-label"><div class="en">Statement</div><div class="ar">كشف الحساب</div></div>
+  </button>
+  <button class="nav-item" onclick="showPage('data',this)">
+    <i class="ti ti-database"></i>
+    <div class="nav-label"><div class="en">Data</div><div class="ar">البيانات المرجعية</div></div>
+  </button>
+  <div style="margin-top:16px;border-top:0.5px solid #eee;padding-top:12px">
+    <div style="font-size:10px;color:#bbb;padding:0 10px 6px;text-transform:uppercase;letter-spacing:.4px">Data · البيانات</div>
+    <button class="nav-item" onclick="saveHTMLFile()" style="background:#EBF2FB;border-radius:7px">
+      <i class="ti ti-device-floppy" style="color:#185FA5"></i>
+      <div class="nav-label"><div class="en" style="color:#185FA5;font-weight:500">Save File</div><div class="ar" style="color:#185FA5">حفظ الملف بالبيانات</div></div>
+    </button>
+    <button class="nav-item" onclick="exportData()">
+      <i class="ti ti-download"></i>
+      <div class="nav-label"><div class="en">Export JSON</div><div class="ar">تصدير البيانات</div></div>
+    </button>
+    <button class="nav-item" onclick="document.getElementById('importFile').click()">
+      <i class="ti ti-upload"></i>
+      <div class="nav-label"><div class="en">Import JSON</div><div class="ar">استيراد البيانات</div></div>
+    </button>
+    <input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(this)"/>
+  </div>
+</div>
+
+<div class="content">
+
+<!-- OVERVIEW -->
+<div id="page-overview" class="page">
+  <div class="page-header">
+    <div class="page-title">Overview <div class="ar">نظرة عامة على الحسابات</div></div>
+  </div>
+  <div class="metrics" id="ov-metrics"></div>
+  <div class="metrics" id="ov-vat-metrics"></div>
+  <div class="section-sep"><i class="ti ti-chart-bar"></i> Top clients by revenue <span class="ar">أكبر العملاء بالإيرادات</span></div>
+  <div class="chart-wrap"><canvas id="clientChart" role="img" aria-label="Revenue by client">Revenue by client.</canvas></div>
+  <div id="chart-leg" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:6px;font-size:11px;color:#888"></div>
+</div>
+
+<!-- PROJECTS -->
+<div id="page-projects" class="page">
+  <div class="page-header">
+    <div class="page-title">Projects <div class="ar">المشاريع والعملاء</div></div>
+    <button class="btn primary" onclick="showForm('project')"><i class="ti ti-plus"></i> Add project <span style="font-size:10px;opacity:.8">/ إضافة مشروع</span></button>
+  </div>
+  <!-- View toggle -->
+  <div style="display:flex;gap:6px;margin-bottom:10px">
+    <button id="proj-view-client" class="btn primary" onclick="setProjView('client')" style="height:32px;font-size:12px">
+      <i class="ti ti-building-store"></i> By Client <span style="font-size:10px;opacity:.8">/ حسب العميل</span>
+    </button>
+    <button id="proj-view-project" class="btn" onclick="setProjView('project')" style="height:32px;font-size:12px">
+      <i class="ti ti-building"></i> By Project <span style="font-size:10px;opacity:.8">/ حسب المشروع</span>
+    </button>
+  </div>
+  <div class="toolbar">
+    <input type="text" placeholder="Search... / بحث" oninput="renderProjects()" id="proj-search"/>
+    <select onchange="renderProjects()" id="proj-filter" style="min-width:160px">
+      <option value="">All / الكل</option>
+    </select>
+  </div>
+  <div id="projects-list"></div>
+</div>
+
+<!-- INCOME -->
+<div id="page-income" class="page">
+  <div class="page-header">
+    <div class="page-title">Income <div class="ar">الإيرادات — الفواتير المستلمة (In)</div></div>
+    <button class="btn primary" onclick="showForm('income')"><i class="ti ti-plus"></i> Add invoice <span style="font-size:10px;opacity:.8">/ إضافة فاتورة</span></button>
+  </div>
+  <div class="toolbar">
+    <input type="text" placeholder="Search... / بحث" oninput="renderIncome()" id="inc-search"/>
+    <select onchange="renderIncome()" id="inc-client"><option value="">All clients / كل العملاء</option></select>
+    <select onchange="renderIncome()" id="inc-project-filter"><option value="">All projects / كل المشاريع</option></select>
+    <select onchange="renderIncome()" id="inc-status">
+      <option value="">All statuses / كل الحالات</option>
+      <option value="Paid">Paid / مدفوع</option>
+      <option value="Pending">Pending / معلق</option>
+      <option value="Partially Paid">Partially Paid / جزئي</option>
+    </select>
+    <select onchange="renderIncome()" id="inc-sheet">
+      <option value="">Both sheets / الشيتان</option>
+      <option value="equipment">Equipment / معدات</option>
+      <option value="backfilling">Backfilling / ردم</option>
+    </select>
+  </div>
+  <div class="metrics" id="inc-metrics"></div>
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr>
+        <th>Date <span class="ar">التاريخ</span></th>
+        <th>Client <span class="ar">العميل</span></th>
+        <th>Project <span class="ar">المشروع</span></th>
+        <th>W/O VAT <span class="ar">بدون ضريبة</span></th>
+        <th>VAT <span class="ar">الضريبة</span></th>
+        <th>Total <span class="ar">الإجمالي</span></th>
+        <th>Description <span class="ar">الوصف</span></th>
+        <th>Status <span class="ar">الحالة</span></th>
+        <th></th>
+      </tr></thead>
+      <tbody id="inc-tbody"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- EXPENSES -->
+<div id="page-expenses" class="page">
+  <div class="page-header">
+    <div class="page-title">Expenses <div class="ar">المصروفات — المدفوعات (Out)</div></div>
+    <button class="btn primary" onclick="showForm('expense')"><i class="ti ti-plus"></i> Add expense <span style="font-size:10px;opacity:.8">/ إضافة مصروف</span></button>
+  </div>
+  <div class="toolbar">
+    <input type="text" placeholder="Search... / بحث" oninput="renderExpenses()" id="exp-search"/>
+    <select onchange="renderExpenses()" id="exp-client-filter"><option value="">All clients / كل العملاء</option></select>
+    <select onchange="renderExpenses()" id="exp-proj"><option value="">All projects / كل المشاريع</option></select>
+    <select onchange="renderExpenses()" id="exp-type">
+      <option value="">All types / كل الأنواع</option>
+    </select>
+    <select onchange="renderExpenses()" id="exp-supplier">
+      <option value="">All suppliers / كل الموردين</option>
+    </select>
+    <select onchange="renderExpenses()" id="exp-sheet">
+      <option value="">Both sheets / الشيتان</option>
+      <option value="equipment">Equipment / معدات</option>
+      <option value="backfilling">Backfilling / ردم</option>
+    </select>
+  </div>
+  <div class="metrics" id="exp-metrics"></div>
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr>
+        <th style="width:88px">Date <span class="ar">التاريخ</span></th>
+        <th>Client <span class="ar">العميل</span></th>
+        <th>Project <span class="ar">المشروع</span></th>
+        <th>Supplier <span class="ar">المورد</span></th>
+        <th style="width:95px">Amount <span class="ar">المبلغ</span></th>
+        <th>Description <span class="ar">الوصف</span></th>
+        <th style="width:90px">Type <span class="ar">النوع</span></th>
+        <th></th>
+      </tr></thead>
+      <tbody id="exp-tbody"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- MONTHLY -->
+<div id="page-monthly" class="page">
+  <div class="page-header">
+    <div class="page-title">Monthly report <div class="ar">التقرير الشهري — الإيرادات والمصروفات شهرياً</div></div>
+  </div>
+  <div class="toolbar">
+    <select onchange="renderMonthly()" id="mon-year"><option value="">All years / كل السنوات</option></select>
+    <select onchange="renderMonthly()" id="mon-type">
+      <option value="">Income + Expenses / الكل</option>
+      <option value="income">Income only / الإيرادات فقط</option>
+      <option value="expenses">Expenses only / المصروفات فقط</option>
+    </select>
+  </div>
+  <div class="metrics" id="mon-totals"></div>
+  <div class="chart-wrap" style="height:260px"><canvas id="monChart" role="img" aria-label="Monthly data">Monthly data.</canvas></div>
+  <div id="mon-legend" style="display:flex;gap:16px;font-size:11px;color:#888;margin-top:6px"></div>
+  <div class="tbl-wrap" style="margin-top:14px">
+    <table>
+      <thead><tr>
+        <th>Month <span class="ar">الشهر</span></th>
+        <th>Income W/O VAT <span class="ar">الإيرادات بدون ضريبة</span></th>
+        <th>VAT <span class="ar">الضريبة</span></th>
+        <th>Expenses <span class="ar">المصروفات</span></th>
+        <th>Net profit <span class="ar">صافي الربح</span></th>
+      </tr></thead>
+      <tbody id="mon-tbody"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- PURCHASES -->
+<div id="page-purchases" class="page">
+  <div class="page-header">
+    <div class="page-title">Purchases <div class="ar">المشتريات — فواتير الشراء القابلة لاسترداد الضريبة</div></div>
+    <button class="btn primary" onclick="showForm('purchase')"><i class="ti ti-plus"></i> Add purchase <span style="font-size:10px;opacity:.8">/ إضافة فاتورة شراء</span></button>
+  </div>
+  <div class="metrics" id="pur-metrics"></div>
+  <div class="toolbar">
+    <input type="text" placeholder="Search... / بحث" oninput="renderPurchases()" id="pur-search"/>
+    <select onchange="renderPurchases()" id="pur-type">
+      <option value="">All types / كل الأنواع</option>
+      <option value="supplier">Supplier invoice / فاتورة مورد</option>
+      <option value="general">General purchase / مشتريات عامة</option>
+    </select>
+    <select onchange="renderPurchases()" id="pur-status">
+      <option value="">All / الكل</option>
+      <option value="Refundable">Refundable / قابل للاسترداد</option>
+      <option value="Pending">Pending / معلق</option>
+      <option value="Refunded">Refunded / تم الاسترداد</option>
+    </select>
+  </div>
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr>
+        <th>Date <span class="ar">التاريخ</span></th>
+        <th>Type <span class="ar">النوع</span></th>
+        <th>Supplier / Item <span class="ar">المورد / الصنف</span></th>
+        <th>W/O VAT <span class="ar">بدون ضريبة</span></th>
+        <th>VAT 15% <span class="ar">الضريبة</span></th>
+        <th>Total <span class="ar">الإجمالي</span></th>
+        <th>Description <span class="ar">الوصف</span></th>
+        <th>Status <span class="ar">الحالة</span></th>
+        <th></th>
+      </tr></thead>
+      <tbody id="pur-tbody"></tbody>
+    </table>
+  </div>
+  <div style="margin-top:14px;background:#fafaf8;border:0.5px solid #eee;border-radius:10px;padding:14px" id="pur-vat-note">
+    <div style="font-size:10px;font-weight:500;color:#888;text-transform:uppercase;letter-spacing:.3px;margin-bottom:8px">
+      VAT refund tracking / متابعة استرداد الضريبة
+    </div>
+    <div class="stmnt-row"><span class="stmnt-lbl">Total VAT on purchases <span class="ar">إجمالي ضريبة المشتريات</span></span><span id="pur-vat-total">-</span></div>
+    <div class="stmnt-row"><span class="stmnt-lbl">Already refunded <span class="ar">تم استرداده</span></span><span id="pur-vat-refunded" style="color:#1D9E75">-</span></div>
+    <div class="stmnt-row total"><span class="stmnt-lbl">Remaining to refund <span class="ar">متبقي للاسترداد</span></span><span id="pur-vat-remaining" style="color:#D85A30">-</span></div>
+  </div>
+</div>
+
+<!-- VAT -->
+<div id="page-vat" class="page">
+  <div class="page-header">
+    <div class="page-title">VAT <div class="ar">ضريبة القيمة المضافة (15%)</div></div>
+  </div>
+  <div class="vat-summary" id="vat-summary"></div>
+  <div class="metrics" id="vat-metrics"></div>
+  <div class="chart-wrap" style="height:200px"><canvas id="vatChart" role="img" aria-label="VAT breakdown">VAT breakdown.</canvas></div>
+  <div id="vat-leg" style="display:flex;gap:16px;font-size:11px;color:#888;margin-top:6px"></div>
+  <div class="section-sep" style="margin-top:16px;display:flex;justify-content:space-between;align-items:center">
+    <span><i class="ti ti-send"></i> VAT paid to government <span class="ar">المبالغ المدفوعة للحكومة (ZATCA)</span></span>
+    <button class="btn primary sm" onclick="showForm('vatpayment')" style="height:28px"><i class="ti ti-plus"></i> Add payment <span style="font-size:10px;opacity:.8">/ إضافة دفعة</span></button>
+  </div>
+  <div class="metrics" id="vp-metrics" style="margin-bottom:10px"></div>
+  <div class="tbl-wrap">
+    <table><thead><tr>
+      <th>Date <span class="ar">التاريخ</span></th>
+      <th>Period <span class="ar">الفترة</span></th>
+      <th>Description <span class="ar">الوصف</span></th>
+      <th>Amount <span class="ar">المبلغ</span></th>
+      <th></th>
+    </tr></thead><tbody id="vat-tbody"></tbody></table>
+  </div>
+</div>
+
+
+<!-- DATA -->
+<div id="page-data" class="page">
+  <div class="page-header">
+    <div class="page-title">Data <div class="ar">البيانات المرجعية — العملاء والمشاريع والموردون والأنواع</div></div>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+
+    <!-- Clients -->
+    <div class="card">
+      <div class="section-sep" style="margin-top:0"><i class="ti ti-building-store"></i> Clients / العملاء
+        <button class="btn primary sm" style="margin-left:auto;height:26px" onclick="addDataItem('clients')"><i class="ti ti-plus"></i></button>
+      </div>
+      <div id="data-clients" style="max-height:300px;overflow-y:auto"></div>
+    </div>
+
+    <!-- Projects -->
+    <div class="card">
+      <div class="section-sep" style="margin-top:0"><i class="ti ti-building"></i> Projects / المشاريع والموردون
+        <button class="btn primary sm" style="margin-left:auto;height:26px" onclick="addDataItem('projects')"><i class="ti ti-plus"></i></button>
+      </div>
+      <div id="data-projects" style="max-height:300px;overflow-y:auto"></div>
+    </div>
+
+    <!-- Suppliers -->
+    <div class="card">
+      <div class="section-sep" style="margin-top:0"><i class="ti ti-users"></i> Suppliers / الموردون
+        <button class="btn primary sm" style="margin-left:auto;height:26px" onclick="addDataItem('suppliers')"><i class="ti ti-plus"></i></button>
+      </div>
+      <div id="data-suppliers" style="max-height:300px;overflow-y:auto"></div>
+    </div>
+
+    <!-- Expense Types -->
+    <div class="card">
+      <div class="section-sep" style="margin-top:0"><i class="ti ti-tag"></i> Expense types / أنواع المصروفات
+        <button class="btn primary sm" style="margin-left:auto;height:26px" onclick="addDataItem('expTypes')"><i class="ti ti-plus"></i></button>
+      </div>
+      <div id="data-exptypes" style="max-height:300px;overflow-y:auto"></div>
+    </div>
+
+  </div>
+  <p class="hint" style="margin-top:12px">Any item added here will automatically appear in all add/edit forms. / أي عنصر تضيفه هنا سيظهر تلقائياً في كل نماذج الإضافة والتعديل.</p>
+</div>
+
+
+<!-- CAPITAL -->
+<div id="page-capital" class="page active">
+  <div class="page-header">
+    <div class="page-title">Capital <div class="ar">رأس المال والتوزيعات</div></div>
+  </div>
+
+  <!-- Summary metrics -->
+  <div class="metrics" id="cap-metrics"></div>
+
+  <!-- Two columns: Assets + Distributions -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:4px">
+
+    <!-- Assets -->
+    <div class="card">
+      <div class="section-sep" style="margin-top:0;display:flex;justify-content:space-between;align-items:center">
+        <span><i class="ti ti-building-bank"></i> Assets / رأس المال</span>
+        <button class="btn primary sm" style="height:26px" onclick="showForm('asset')">
+          <i class="ti ti-plus"></i> Add
+        </button>
+      </div>
+      <div class="tbl-wrap">
+        <table><thead><tr>
+          <th>Date <span class="ar">التاريخ</span></th>
+          <th>Amount <span class="ar">المبلغ</span></th>
+          <th>Note <span class="ar">ملاحظة</span></th>
+          <th></th>
+        </tr></thead><tbody id="assets-tbody"></tbody></table>
+      </div>
+      <div style="display:flex;justify-content:space-between;padding:8px 6px 0;font-size:13px;font-weight:500;border-top:0.5px solid #eee;margin-top:8px">
+        <span>Total Assets <span style="font-size:11px;color:#888;font-weight:400">/ إجمالي رأس المال</span></span>
+        <span id="cap-assets-total" style="color:#185FA5"></span>
+      </div>
+    </div>
+
+    <!-- Distributions -->
+    <div class="card">
+      <div class="section-sep" style="margin-top:0;display:flex;justify-content:space-between;align-items:center">
+        <span><i class="ti ti-cash"></i> Distributions / توزيعات الأرباح</span>
+        <button class="btn primary sm" style="height:26px" onclick="showForm('distribution')">
+          <i class="ti ti-plus"></i> Add
+        </button>
+      </div>
+      <div class="tbl-wrap">
+        <table><thead><tr>
+          <th>Date <span class="ar">التاريخ</span></th>
+          <th>Amount <span class="ar">المبلغ</span></th>
+          <th>Note <span class="ar">ملاحظة</span></th>
+          <th></th>
+        </tr></thead><tbody id="dist-tbody"></tbody></table>
+      </div>
+      <div style="display:flex;justify-content:space-between;padding:8px 6px 0;font-size:13px;font-weight:500;border-top:0.5px solid #eee;margin-top:8px">
+        <span>Total Distributed <span style="font-size:11px;color:#888;font-weight:400">/ إجمالي الموزّع</span></span>
+        <span id="cap-dist-total" style="color:#D85A30"></span>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Balance breakdown -->
+  <div class="card" style="margin-top:12px" id="cap-breakdown">
+    <div class="section-sep" style="margin-top:0"><i class="ti ti-calculator"></i> Balance breakdown / تفصيل الأرصدة</div>
+    <div id="cap-breakdown-rows"></div>
+  </div>
+</div>
+
+<!-- STATEMENT -->
+<div id="page-statement" class="page">
+  <div class="page-header">
+    <div class="page-title">Statements <div class="ar">التقارير والكشوفات</div></div>
+  </div>
+
+  <!-- Report type tabs -->
+  <div style="display:flex;gap:6px;margin-bottom:14px">
+    <button id="stmt-tab-company" class="btn primary" onclick="switchStmtTab('company')"
+      style="height:34px;font-size:12px">
+      <i class="ti ti-chart-bar"></i> Company P&L <span style="font-size:10px;opacity:.8">/ تقرير الشركة الداخلي</span>
+    </button>
+    <button id="stmt-tab-client" class="btn" onclick="switchStmtTab('client')"
+      style="height:34px;font-size:12px">
+      <i class="ti ti-user-dollar"></i> Client Statement <span style="font-size:10px;opacity:.8">/ كشف حساب عميل</span>
+    </button>
+  </div>
+
+  <!-- Company P&L toolbar -->
+  <div id="stmt-toolbar-company">
+    <!-- Type toggle -->
+    <div style="display:flex;gap:6px;margin-bottom:8px">
+      <button id="co-type-all"      class="btn primary sm" onclick="setCoType('all')"     style="height:28px;font-size:11px"><i class="ti ti-building-community"></i> All / الكل</button>
+      <button id="co-type-client"   class="btn sm"         onclick="setCoType('client')"  style="height:28px;font-size:11px"><i class="ti ti-building-store"></i> Client / عميل</button>
+      <button id="co-type-project"  class="btn sm"         onclick="setCoType('project')" style="height:28px;font-size:11px"><i class="ti ti-building"></i> Project / مشروع</button>
+      <button id="co-type-supplier" class="btn sm"         onclick="setCoType('supplier')"style="height:28px;font-size:11px"><i class="ti ti-users"></i> Supplier / مورد</button>
+    </div>
+    <div class="toolbar" style="margin-bottom:0">
+      <select id="stmt-scope" style="display:none"><option value="company">company</option></select>
+      <select onchange="renderStatement()" id="stmt-year"><option value="">All periods / كل الفترات</option></select>
+      <select onchange="renderStatement()" id="stmt-co-entity" style="min-width:160px;display:none">
+        <option value="">All / الكل</option>
+      </select>
+      <button class="btn sm" onclick="printStatement()"><i class="ti ti-printer"></i> Print / طباعة</button>
+    </div>
+  </div>
+
+  <!-- Client Statement toolbar -->
+  <div id="stmt-toolbar-client" style="display:none">
+    <!-- Statement type toggle -->
+    <div style="display:flex;gap:6px;margin-bottom:8px">
+      <button id="stmt-cl-type-client"  class="btn primary sm" onclick="setStmtClientType('client')"  style="height:28px;font-size:11px"><i class="ti ti-building-store"></i> Client / عميل</button>
+      <button id="stmt-cl-type-project" class="btn sm"         onclick="setStmtClientType('project')" style="height:28px;font-size:11px"><i class="ti ti-building"></i> Project / مشروع</button>
+      <button id="stmt-cl-type-supplier"class="btn sm"         onclick="setStmtClientType('supplier')"style="height:28px;font-size:11px"><i class="ti ti-users"></i> Supplier / مورد</button>
+    </div>
+    <div class="toolbar" style="margin-bottom:0">
+      <select onchange="renderClientStatement()" id="stmt-client" style="min-width:180px">
+        <option value="">-- Select / اختر --</option>
+      </select>
+      <select onchange="renderClientStatement()" id="stmt-client-year"><option value="">All periods / كل الفترات</option></select>
+      <button class="btn sm" onclick="printStatement()"><i class="ti ti-printer"></i> Print / طباعة</button>
+    </div>
+  </div>
+
+  <div id="stmt-content"></div>
+</div>
+
+</div><!-- /content -->
+</div><!-- /main -->
+
+<!-- Permanent datalists - always in DOM, populated by JS -->
+<datalist id="dl-clients"></datalist>
+<datalist id="dl-projects"></datalist>
+<datalist id="dl-suppliers"></datalist>
+
+</div><!-- /app -->
+
+<!-- MODAL -->
+<div class="modal-overlay" id="form-overlay">
+  <div class="modal" id="form-box"></div>
+</div>
+
+<script>
+const SAR = v => 'SAR ' + (v||0).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+const fmt2 = v => (v||0).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+const typeLabel = {equipment:'Equipment / معدات',labor:'Labor / عمالة',admin:'Admin / إداري',vat:'VAT pmt / ضريبة',running:'Running / تشغيل',materials:'Materials / مواد',other:'Other / أخرى'};
+const typeCls   = {equipment:'b-equipment',labor:'b-labor',admin:'b-admin',vat:'b-vat',running:'b-running',materials:'b-equipment',other:'b-other'};
+
+const DB = { income:[], expenses:[], purchases:[], vatPayments:[], masterData:null, assets:[], distributions:[] };
+let monChartRef=null, clientChartRef=null, vatChartRef=null;
+function dc(r){if(r){try{r.destroy()}catch(e){}}}
+function uid(p){return p+Date.now()+Math.random().toString(36).slice(2,6)}
+
+// ── SEED DATA ──────────────────────────────────────────────────────────────
+const SEED_I = [
+  {id:'i_eq1',date:'2024-07-04',client:'Equipment',project:'',wo_vat:2600,vat:390,total:2990,desc:'Invoice No 8 - No PO',status:'Paid',sheet:'equipment'},
+  {id:'i_eq2',date:'2024-07-22',client:'Equipment',project:'',wo_vat:1000,vat:0,total:1000,desc:'Paid cash',status:'Paid',sheet:'equipment'},
+  {id:'i_eq3',date:'2024-07-03',client:'Equipment',project:'',wo_vat:3323.06,vat:498.46,total:3821.52,desc:'Invoice No 9 - PO/RBE/E/PO/104',status:'Paid',sheet:'equipment'},
+  {id:'i_eq4',date:'2024-07-31',client:'Equipment',project:'',wo_vat:1800,vat:0,total:1800,desc:'Paid cash - Moragan',status:'Paid',sheet:'equipment'},
+  {id:'i_eq5',date:'2024-07-31',client:'Equipment',project:'',wo_vat:28615.16,vat:4292.27,total:32907.43,desc:'Invoice No 21 - PO/RBE/E/PO/104',status:'Paid',sheet:'equipment'},
+  {id:'i_eq6',date:'2024-07-31',client:'Equipment',project:'',wo_vat:3115.38,vat:467.31,total:3582.69,desc:'Invoice No 17 - PO/RBE/E/PO/125',status:'Paid',sheet:'equipment'},
+  {id:'i_eq7',date:'2024-07-31',client:'Equipment',project:'',wo_vat:15288.41,vat:2293.26,total:17581.67,desc:'Invoice No 20 - PO/AND/E/PO/179',status:'Paid',sheet:'equipment'},
+  {id:'i_eq8',date:'2024-12-09',client:'Equipment',project:'',wo_vat:26999.96,vat:4050,total:31049.96,desc:'Invoice No 24 - PO/AND/E/PO/179',status:'Paid',sheet:'equipment'},
+  {id:'i_eq9',date:'2024-09-30',client:'Equipment',project:'',wo_vat:3115.38,vat:467.31,total:3582.69,desc:'Invoice No 26 - PO/AND/E/PO/179',status:'Paid',sheet:'equipment'},
+  {id:'i_eq10',date:'2024-12-09',client:'Equipment',project:'',wo_vat:70500,vat:10575,total:81075,desc:'Invoice No 72 - PO/THQ/E/PO',status:'Paid',sheet:'equipment'},
+  {id:'i_eq11',date:'2024-12-17',client:'Equipment',project:'',wo_vat:65000,vat:9750,total:74750,desc:'Invoice No 75 - PO/RBE/E/PO/0045',status:'Paid',sheet:'equipment'},
+  {id:'i_eq12',date:'2025-01-22',client:'ALS/RABIA',project:'',wo_vat:73000,vat:10950,total:83950,desc:'Invoice No 87 - ALS crane FOR RABIA',status:'Paid',sheet:'equipment'},
+  {id:'i_eq13',date:'2025-02-18',client:'ALS/RABIA',project:'',wo_vat:10300,vat:1545,total:11845,desc:'Invoice No 92 - ALS forklift FOR RABIA',status:'Paid',sheet:'equipment'},
+  {id:'i_eq14',date:'2025-02-23',client:'ENJAZ',project:'',wo_vat:1750,vat:0,total:1750,desc:'Paid cash Poklain ENGAZ',status:'Paid',sheet:'equipment'},
+  {id:'i_eq15',date:'2025-03-13',client:'ENJAZ',project:'',wo_vat:8950,vat:0,total:8950,desc:'Paid cash pobcat ENGAZ',status:'Paid',sheet:'equipment'},
+  {id:'i_eq16',date:'2025-05-28',client:'ENJAZ',project:'',wo_vat:13600,vat:2040,total:15640,desc:'Invoice No 110 - PO ENJAZ',status:'Paid',sheet:'equipment'},
+  {id:'i_eq17',date:'2025-07-16',client:'ALS',project:'',wo_vat:6000,vat:900,total:6900,desc:'Invoice No 134 - ALS crane 100T',status:'Paid',sheet:'equipment'},
+  {id:'i_eq18',date:'2025-07-20',client:'ALS',project:'',wo_vat:3000,vat:450,total:3450,desc:'Invoice No 137 - ALS crane 100T',status:'Paid',sheet:'equipment'},
+  {id:'i_eq19',date:'2025-08-22',client:'NESMA',project:'',wo_vat:3140,vat:0,total:3140,desc:'Nessma Albahr sub contractor cash',status:'Paid',sheet:'equipment'},
+  {id:'i_eq20',date:'2026-04-27',client:'ALS',project:'',wo_vat:38000,vat:5700,total:43700,desc:'Invoice No 253-254 ALS Company',status:'Paid',sheet:'equipment'},
+  {id:'i_b1',date:'2024-07-07',client:'TAJ',project:'',wo_vat:11760,vat:1764,total:13524,desc:'Invoice No 12 - TAJ BDI',status:'Paid',sheet:'backfilling'},
+  {id:'i_b2',date:'2024-07-07',client:'TAJ',project:'',wo_vat:29120,vat:4368,total:33488,desc:'Invoice No 11 - TAJ RCN',status:'Paid',sheet:'backfilling'},
+  {id:'i_b3',date:'2024-07-15',client:'TAJ',project:'',wo_vat:16800,vat:2520,total:19320,desc:'Invoice No 13 - TAJ BDI',status:'Paid',sheet:'backfilling'},
+  {id:'i_b4',date:'2024-07-15',client:'TAJ',project:'',wo_vat:16800,vat:2520,total:19320,desc:'Invoice No 14 - TAJ RCN',status:'Paid',sheet:'backfilling'},
+  {id:'i_b5',date:'2024-07-31',client:'TAJ',project:'',wo_vat:14000,vat:2100,total:16100,desc:'Invoice No 15 - TAJ BDI',status:'Paid',sheet:'backfilling'},
+  {id:'i_b6',date:'2024-08-07',client:'Lecon',project:'',wo_vat:10000,vat:0,total:10000,desc:'Sub-Base Cash #1',status:'Paid',sheet:'backfilling'},
+  {id:'i_b7',date:'2024-08-12',client:'Lecon',project:'',wo_vat:21000,vat:0,total:21000,desc:'Sub-Base Cash #2',status:'Paid',sheet:'backfilling'},
+  {id:'i_b8',date:'2024-08-18',client:'Lecon',project:'',wo_vat:8060,vat:0,total:8060,desc:'Sub-Base Cash #3',status:'Paid',sheet:'backfilling'},
+  {id:'i_b9',date:'2024-08-21',client:'Lecon',project:'',wo_vat:7500,vat:0,total:7500,desc:'Sub-Base Cash #4',status:'Paid',sheet:'backfilling'},
+  {id:'i_b10',date:'2024-08-26',client:'Lecon',project:'',wo_vat:10000,vat:0,total:10000,desc:'Sub-Base Cash #5',status:'Paid',sheet:'backfilling'},
+  {id:'i_b11',date:'2024-09-12',client:'TAJ',project:'',wo_vat:20160,vat:3024,total:23184,desc:'Invoice No 22 - TAJ BDI',status:'Paid',sheet:'backfilling'},
+  {id:'i_b12',date:'2024-10-03',client:'ENJAZ 1-RAK',project:'',wo_vat:22080,vat:3312,total:25392,desc:'Invoice No 27 - PO VERBAL',status:'Paid',sheet:'backfilling'},
+  {id:'i_b13',date:'2024-10-06',client:'ENJAZ 1-RAK',project:'',wo_vat:1104,vat:165.6,total:1269.6,desc:'Invoice No 28',status:'Paid',sheet:'backfilling'},
+  {id:'i_b14',date:'2024-10-11',client:'Lecon',project:'',wo_vat:1500,vat:0,total:1500,desc:'Supply Sub-Base Cash',status:'Paid',sheet:'backfilling'},
+  {id:'i_b15',date:'2024-10-08',client:'ENJAZ 2-RAK',project:'',wo_vat:21000,vat:3150,total:24150,desc:'Invoice No 29 - PO VERBAL',status:'Paid',sheet:'backfilling'},
+  {id:'i_b16',date:'2024-10-09',client:'ENJAZ 2-RAK',project:'',wo_vat:21000,vat:3150,total:24150,desc:'Invoice No 32',status:'Paid',sheet:'backfilling'},
+  {id:'i_b17',date:'2024-10-19',client:'ENJAZ 3-RAK',project:'',wo_vat:11760,vat:1764,total:13524,desc:'Invoice No 33',status:'Paid',sheet:'backfilling'},
+  {id:'i_b18',date:'2024-11-03',client:'ENJAZ 4-RAK',project:'',wo_vat:31500,vat:4725,total:36225,desc:'Invoice No 37',status:'Paid',sheet:'backfilling'},
+  {id:'i_b19',date:'2024-11-07',client:'ENJAZ 4-RAK',project:'',wo_vat:5124,vat:768.6,total:5892.6,desc:'Invoice No 40',status:'Paid',sheet:'backfilling'},
+  {id:'i_b20',date:'2024-11-05',client:'ENJAZ 2-AZIZ',project:'',wo_vat:24150,vat:3622.5,total:27772.5,desc:'Invoice No 38',status:'Paid',sheet:'backfilling'},
+  {id:'i_b21',date:'2024-11-05',client:'ENJAZ 2-AZIZ',project:'',wo_vat:14835,vat:2225.25,total:17060.25,desc:'Invoice No 39',status:'Paid',sheet:'backfilling'},
+  {id:'i_b22',date:'2024-10-23',client:'Intelligent',project:'',wo_vat:42500,vat:6375,total:48875,desc:'Invoice No 34',status:'Paid',sheet:'backfilling'},
+  {id:'i_b23',date:'2024-10-26',client:'Intelligent',project:'',wo_vat:85000,vat:12750,total:97750,desc:'Invoice No 35',status:'Paid',sheet:'backfilling'},
+  {id:'i_b24',date:'2024-10-31',client:'Intelligent',project:'',wo_vat:42500,vat:6375,total:48875,desc:'Invoice No 36',status:'Paid',sheet:'backfilling'},
+  {id:'i_b25',date:'2024-11-10',client:'Intelligent',project:'',wo_vat:21956.5,vat:3293.475,total:25249.975,desc:'Invoice No 41',status:'Pending',sheet:'backfilling'},
+  {id:'i_b26',date:'2024-11-07',client:'NESMA',project:'',wo_vat:22522.5,vat:3378.375,total:25900.875,desc:'Invoice No 43',status:'Paid',sheet:'backfilling'},
+  {id:'i_b27',date:'2024-12-07',client:'NESMA',project:'',wo_vat:30030,vat:4504.5,total:34534.5,desc:'Invoice No 44',status:'Paid',sheet:'backfilling'},
+  {id:'i_b28',date:'2024-11-14',client:'NESMA',project:'',wo_vat:30030,vat:4504.5,total:34534.5,desc:'Invoice No 47',status:'Paid',sheet:'backfilling'},
+  {id:'i_b29',date:'2024-11-14',client:'NESMA',project:'',wo_vat:17517.5,vat:2627.625,total:20145.125,desc:'Invoice No 49',status:'Paid',sheet:'backfilling'},
+  {id:'i_b30',date:'2024-11-16',client:'NESMA',project:'',wo_vat:35035,vat:5255.25,total:40290.25,desc:'Invoice No 51',status:'Paid',sheet:'backfilling'},
+  {id:'i_b31',date:'2024-11-16',client:'NESMA',project:'',wo_vat:25359.95,vat:3803.99,total:29163.94,desc:'Invoice No 52',status:'Paid',sheet:'backfilling'},
+  {id:'i_b32',date:'2024-11-18',client:'NESMA',project:'',wo_vat:10608,vat:1591.2,total:12199.2,desc:'Invoice No 53',status:'Paid',sheet:'backfilling'},
+  {id:'i_b33',date:'2024-11-18',client:'NESMA',project:'',wo_vat:33033,vat:4954.95,total:37987.95,desc:'Invoice No 54',status:'Paid',sheet:'backfilling'},
+  {id:'i_b34',date:'2024-11-19',client:'ENJAZ 2-AZIZ',project:'',wo_vat:4410,vat:661.5,total:5071.5,desc:'Invoice No 56',status:'Paid',sheet:'backfilling'},
+  {id:'i_b35',date:'2024-11-19',client:'ENJAZ 2-AZIZ',project:'',wo_vat:24840,vat:3726,total:28566,desc:'Invoice No 58',status:'Paid',sheet:'backfilling'},
+  {id:'i_b36',date:'2024-11-19',client:'ENJAZ 5-RAK',project:'',wo_vat:16233,vat:2434.95,total:18667.95,desc:'Invoice No 57',status:'Paid',sheet:'backfilling'},
+  {id:'i_b37',date:'2024-11-20',client:'ENJAZ 5-RAK',project:'',wo_vat:31947,vat:4792.05,total:36739.05,desc:'Invoice No 59',status:'Paid',sheet:'backfilling'},
+  {id:'i_b38',date:'2024-11-21',client:'NESMA',project:'',wo_vat:35535.5,vat:5330.325,total:40865.825,desc:'Invoice No 60',status:'Paid',sheet:'backfilling'},
+  {id:'i_b39',date:'2024-11-21',client:'NESMA',project:'',wo_vat:8840,vat:1326,total:10166,desc:'Invoice No 61',status:'Paid',sheet:'backfilling'},
+  {id:'i_b40',date:'2024-11-26',client:'ENJAZ 6-RAK',project:'',wo_vat:11340,vat:1701,total:13041,desc:'Invoice No 64',status:'Paid',sheet:'backfilling'},
+  {id:'i_b41',date:'2024-12-01',client:'NESMA',project:'',wo_vat:2000,vat:300,total:2300,desc:'Invoice No 65',status:'Paid',sheet:'backfilling'},
+  {id:'i_b42',date:'2024-12-01',client:'NESMA',project:'',wo_vat:8901.2,vat:1335.18,total:10236.38,desc:'Invoice No 68',status:'Paid',sheet:'backfilling'},
+  {id:'i_b43',date:'2024-12-04',client:'ENJAZ 7-RAK',project:'',wo_vat:7770,vat:1165.5,total:8935.5,desc:'Invoice No 67',status:'Paid',sheet:'backfilling'},
+  {id:'i_b44',date:'2024-12-07',client:'ENJAZ 8-RAK',project:'',wo_vat:5000,vat:750,total:5750,desc:'Invoice No 71',status:'Paid',sheet:'backfilling'},
+  {id:'i_b45',date:'2024-12-14',client:'ENJAZ 9-RAK',project:'',wo_vat:13800,vat:2070,total:15870,desc:'Invoice No 73',status:'Paid',sheet:'backfilling'},
+  {id:'i_b46',date:'2024-12-17',client:'ENJAZ 9-RAK',project:'',wo_vat:3450,vat:517.5,total:3967.5,desc:'Invoice No 74',status:'Paid',sheet:'backfilling'},
+  {id:'i_b47',date:'2024-12-22',client:'ENJAZ-RAK',project:'',wo_vat:2350,vat:0,total:2350,desc:'Cash',status:'Paid',sheet:'backfilling'},
+  {id:'i_b48',date:'2024-12-24',client:'ENJAZ 10-RAK',project:'',wo_vat:18900,vat:2835,total:21735,desc:'Invoice No 76',status:'Paid',sheet:'backfilling'},
+  {id:'i_b49',date:'2024-12-24',client:'TAJ',project:'',wo_vat:5040,vat:756,total:5796,desc:'Invoice No 77 - TAJ BDI',status:'Paid',sheet:'backfilling'},
+  {id:'i_b50',date:'2024-12-29',client:'ENJAZ 10-RAK',project:'',wo_vat:8970,vat:1345.5,total:10315.5,desc:'Invoice No 78',status:'Paid',sheet:'backfilling'},
+  {id:'i_b51',date:'2024-12-31',client:'ENJAZ 2-AZIZ',project:'',wo_vat:2300,vat:345,total:2645,desc:'Invoice No 80',status:'Paid',sheet:'backfilling'},
+  {id:'i_b52',date:'2025-01-01',client:'NESMA',project:'',wo_vat:122776.46,vat:18416.469,total:141192.929,desc:'Invoice No 81',status:'Paid',sheet:'backfilling'},
+  {id:'i_b53',date:'2025-01-07',client:'NESMA',project:'',wo_vat:5200,vat:780,total:5980,desc:'Invoice No 82',status:'Paid',sheet:'backfilling'},
+  {id:'i_b54',date:'2025-01-09',client:'ENJAZ 11-RAK',project:'',wo_vat:14700,vat:2205,total:16905,desc:'Invoice No 84',status:'Paid',sheet:'backfilling'},
+  {id:'i_b55',date:'2025-01-21',client:'NESMA',project:'',wo_vat:147252.16,vat:22087.824,total:169339.984,desc:'Invoice No 85',status:'Paid',sheet:'backfilling'},
+  {id:'i_b56',date:'2025-01-21',client:'ENJAZ 12-RAK',project:'',wo_vat:4200,vat:630,total:4830,desc:'Invoice No 86',status:'Paid',sheet:'backfilling'},
+  {id:'i_b57',date:'2025-01-25',client:'ENJAZ-Qalaa',project:'',wo_vat:37200,vat:5580,total:42780,desc:'Invoice No 88',status:'Paid',sheet:'backfilling'},
+  {id:'i_b58',date:'2025-01-28',client:'ENJAZ-Qalaa',project:'',wo_vat:12600,vat:1890,total:14490,desc:'Invoice No 89',status:'Paid',sheet:'backfilling'},
+  {id:'i_b59',date:'2025-01-30',client:'NESMA',project:'',wo_vat:286441.76,vat:42966.264,total:329408.024,desc:'Invoice No 90',status:'Paid',sheet:'backfilling'},
+  {id:'i_b60',date:'2025-02-10',client:'ENJAZ-Qalaa',project:'',wo_vat:17280,vat:2592,total:19872,desc:'Invoice No 93',status:'Paid',sheet:'backfilling'},
+  {id:'i_b61',date:'2025-02-12',client:'NESMA',project:'',wo_vat:235471.3,vat:35320.695,total:270791.995,desc:'Invoice No 94',status:'Paid',sheet:'backfilling'},
+  {id:'i_b62',date:'2025-02-16',client:'ENJAZ 2-AZIZ',project:'',wo_vat:5350,vat:802.5,total:6152.5,desc:'Invoice No 95',status:'Paid',sheet:'backfilling'},
+  {id:'i_b63',date:'2025-02-23',client:'NESMA',project:'',wo_vat:255261.16,vat:38289.174,total:293550.334,desc:'Invoice No 96',status:'Paid',sheet:'backfilling'},
+  {id:'i_b64',date:'2025-03-03',client:'ENJAZ 13-RAK',project:'',wo_vat:12039,vat:1805.85,total:13844.85,desc:'Invoice No 97',status:'Paid',sheet:'backfilling'},
+  {id:'i_b65',date:'2025-03-08',client:'ENJAZ 13-RAK',project:'',wo_vat:19999.98,vat:2999.997,total:22999.977,desc:'Invoice No 98',status:'Paid',sheet:'backfilling'},
+  {id:'i_b66',date:'2025-03-13',client:'NESMA',project:'',wo_vat:181983.56,vat:27297.534,total:209281.094,desc:'Invoice No 99',status:'Paid',sheet:'backfilling'},
+  {id:'i_b67',date:'2025-03-18',client:'ENJAZ 15-RAK',project:'',wo_vat:8008,vat:1201.2,total:9209.2,desc:'Invoice No 100',status:'Paid',sheet:'backfilling'},
+  {id:'i_b68',date:'2025-03-25',client:'ENJAZ-Qalaa',project:'',wo_vat:15000,vat:2250,total:17250,desc:'Invoice No 101',status:'Paid',sheet:'backfilling'},
+  {id:'i_b69',date:'2025-03-26',client:'ENJAZ 15-RAK',project:'',wo_vat:1144,vat:171.6,total:1315.6,desc:'Invoice No 102',status:'Paid',sheet:'backfilling'},
+  {id:'i_b70',date:'2025-05-06',client:'NESMA',project:'',wo_vat:134471.4,vat:20170.71,total:154642.11,desc:'Invoice No 105',status:'Paid',sheet:'backfilling'},
+  {id:'i_b71',date:'2025-05-14',client:'MASHREQ-Rak',project:'',wo_vat:30050,vat:4507.5,total:34557.5,desc:'Invoice No 107',status:'Paid',sheet:'backfilling'},
+  {id:'i_b72',date:'2025-05-28',client:'NESMA-Dana',project:'',wo_vat:7550,vat:1132.5,total:8682.5,desc:'Invoice No 108',status:'Paid',sheet:'backfilling'},
+  {id:'i_b73',date:'2025-05-28',client:'NESMA',project:'',wo_vat:2325,vat:348.75,total:2673.75,desc:'Invoice No 109',status:'Paid',sheet:'backfilling'},
+  {id:'i_b74',date:'2025-06-01',client:'NESMA-Dana',project:'',wo_vat:900,vat:135,total:1035,desc:'Invoice No 111',status:'Paid',sheet:'backfilling'},
+  {id:'i_b75',date:'2025-06-19',client:'ENJAZ-Qalaa1',project:'',wo_vat:9000,vat:1350,total:10350,desc:'Invoice No 114',status:'Paid',sheet:'backfilling'},
+  {id:'i_b76',date:'2025-06-19',client:'NESMA-Dana',project:'',wo_vat:8200,vat:1230,total:9430,desc:'Invoice No 116',status:'Paid',sheet:'backfilling'},
+  {id:'i_b77',date:'2025-06-23',client:'NESMA',project:'',wo_vat:102465.62,vat:15369.843,total:117835.463,desc:'Invoice No 145',status:'Paid',sheet:'backfilling'},
+  {id:'i_b78',date:'2025-06-29',client:'NESMA',project:'',wo_vat:21763.2,vat:3264.48,total:25027.68,desc:'Invoice No 120',status:'Paid',sheet:'backfilling'},
+  {id:'i_b79',date:'2025-06-29',client:'NESMA-Dana',project:'',wo_vat:42771.36,vat:6415.704,total:49187.064,desc:'Invoice No 121',status:'Paid',sheet:'backfilling'},
+  {id:'i_b80',date:'2025-06-29',client:'NESMA-BAHR',project:'',wo_vat:11900,vat:1785,total:13685,desc:'Invoice No 122',status:'Paid',sheet:'backfilling'},
+  {id:'i_b81',date:'2025-06-29',client:'NESMA-Dana',project:'',wo_vat:6575,vat:986.25,total:7561.25,desc:'Invoice No 123',status:'Paid',sheet:'backfilling'},
+  {id:'i_b82',date:'2025-07-06',client:'NESMA-BAHR',project:'',wo_vat:2450,vat:367.5,total:2817.5,desc:'Invoice No 126',status:'Paid',sheet:'backfilling'},
+  {id:'i_b83',date:'2025-07-06',client:'NESMA',project:'',wo_vat:3300,vat:495,total:3795,desc:'Invoice No 127',status:'Paid',sheet:'backfilling'},
+  {id:'i_b84',date:'2025-07-14',client:'NESMA-BAHR',project:'',wo_vat:2200,vat:330,total:2530,desc:'Invoice No 128',status:'Paid',sheet:'backfilling'},
+  {id:'i_b85',date:'2025-07-14',client:'NESMA-Alhada',project:'',wo_vat:2200,vat:330,total:2530,desc:'Invoice No 129',status:'Paid',sheet:'backfilling'},
+  {id:'i_b86',date:'2025-07-14',client:'NESMA',project:'',wo_vat:2125,vat:318.75,total:2443.75,desc:'Invoice No 130',status:'Paid',sheet:'backfilling'},
+  {id:'i_b87',date:'2025-07-15',client:'ENJAZ-RAK New',project:'',wo_vat:6600,vat:990,total:7590,desc:'Invoice No 131',status:'Paid',sheet:'backfilling'},
+  {id:'i_b88',date:'2025-07-16',client:'NESMA-Alhada',project:'',wo_vat:2173.91,vat:326.086,total:2499.996,desc:'Invoice No 132',status:'Paid',sheet:'backfilling'},
+  {id:'i_b89',date:'2025-07-16',client:'NESMA-BAHR',project:'',wo_vat:14951.84,vat:2242.776,total:17194.616,desc:'Invoice No 133',status:'Paid',sheet:'backfilling'},
+  {id:'i_b90',date:'2025-07-17',client:'MASHREQ-Rak',project:'',wo_vat:600,vat:90,total:690,desc:'Invoice No 135',status:'Paid',sheet:'backfilling'},
+  {id:'i_b91',date:'2025-07-22',client:'NESMA-Dana',project:'',wo_vat:7457.78,vat:1118.667,total:8576.447,desc:'Invoice No 138',status:'Paid',sheet:'backfilling'},
+  {id:'i_b92',date:'2025-07-27',client:'NESMA-Alhada',project:'',wo_vat:44241.53,vat:6636.229,total:50877.759,desc:'Invoice No 139',status:'Paid',sheet:'backfilling'},
+  {id:'i_b93',date:'2025-07-31',client:'Hada-Bahr',project:'',wo_vat:2000,vat:300,total:2300,desc:'Invoice No 140',status:'Paid',sheet:'backfilling'},
+  {id:'i_b94',date:'2025-07-31',client:'NESMA-Dana',project:'',wo_vat:6100,vat:915,total:7015,desc:'Invoice No 141',status:'Paid',sheet:'backfilling'},
+  {id:'i_b95',date:'2025-07-31',client:'ENJAZ-RAK New',project:'',wo_vat:3000,vat:450,total:3450,desc:'Invoice No 142-165',status:'Paid',sheet:'backfilling'},
+  {id:'i_b96',date:'2025-08-21',client:'NESMA-Dana',project:'',wo_vat:3000,vat:450,total:3450,desc:'Invoice No 146',status:'Paid',sheet:'backfilling'},
+  {id:'i_b97',date:'2025-08-25',client:'NESMA-BAHR',project:'',wo_vat:25912.88,vat:3886.932,total:29799.812,desc:'Invoice No 147/152',status:'Paid',sheet:'backfilling'},
+  {id:'i_b98',date:'2025-09-01',client:'ENJAZ-Sheraa',project:'',wo_vat:23400,vat:3510,total:26910,desc:'Invoice No 148',status:'Paid',sheet:'backfilling'},
+  {id:'i_b99',date:'2025-09-09',client:'NESMA-Dana',project:'',wo_vat:5100,vat:765,total:5865,desc:'Invoice No 149',status:'Paid',sheet:'backfilling'},
+  {id:'i_b100',date:'2025-09-09',client:'ENJAZ-RAK New',project:'',wo_vat:11750,vat:1762.5,total:13512.5,desc:'Invoice No 150',status:'Paid',sheet:'backfilling'},
+  {id:'i_b101',date:'2025-09-11',client:'NESMA',project:'',wo_vat:11428.12,vat:1714.218,total:13142.338,desc:'Invoice No 151',status:'Paid',sheet:'backfilling'},
+  {id:'i_b102',date:'2025-09-14',client:'ENJAZ-Rayan',project:'',wo_vat:3000,vat:450,total:3450,desc:'Invoice No 153',status:'Paid',sheet:'backfilling'},
+  {id:'i_b103',date:'2025-09-14',client:'ENJAZ-Rayan',project:'',wo_vat:1250,vat:187.5,total:1437.5,desc:'Invoice No 154',status:'Paid',sheet:'backfilling'},
+  {id:'i_b104',date:'2025-09-14',client:'SALMAN-BAHR/HADA',project:'',wo_vat:34834.8,vat:5225.22,total:40060.02,desc:'Invoice No 158',status:'Paid',sheet:'backfilling'},
+  {id:'i_b105',date:'2025-09-20',client:'NESMA-Alhada',project:'',wo_vat:36857.32,vat:5528.598,total:42385.918,desc:'Invoice No 155',status:'Paid',sheet:'backfilling'},
+  {id:'i_b106',date:'2025-09-20',client:'NESMA-Dana',project:'',wo_vat:12814.56,vat:1922.184,total:14736.744,desc:'Invoice No 156',status:'Paid',sheet:'backfilling'},
+  {id:'i_b107',date:'2025-09-24',client:'NESMA-BAHR',project:'',wo_vat:35987.81,vat:5398.171,total:41385.981,desc:'Invoice No 157',status:'Paid',sheet:'backfilling'},
+  {id:'i_b108',date:'2025-09-30',client:'ENJAZ-Rayan',project:'',wo_vat:3150,vat:472.5,total:3622.5,desc:'Invoice No 159',status:'Paid',sheet:'backfilling'},
+  {id:'i_b109',date:'2025-09-30',client:'NESMA-Bayonia',project:'',wo_vat:12822.8,vat:1923.42,total:14746.22,desc:'Invoice No 160',status:'Paid',sheet:'backfilling'},
+  {id:'i_b110',date:'2025-10-04',client:'NESMA-Alhada',project:'',wo_vat:43264,vat:6489.6,total:49753.6,desc:'Invoice No 161',status:'Paid',sheet:'backfilling'},
+  {id:'i_b111',date:'2025-10-05',client:'NESMA-Dana',project:'',wo_vat:4850,vat:727.5,total:5577.5,desc:'Invoice No 162',status:'Paid',sheet:'backfilling'},
+  {id:'i_b112',date:'2025-10-08',client:'ENJAZ-Rayan',project:'',wo_vat:1250,vat:187.5,total:1437.5,desc:'Invoice No 163',status:'Paid',sheet:'backfilling'},
+  {id:'i_b113',date:'2025-10-08',client:'NESMA-Dana',project:'',wo_vat:2200,vat:330,total:2530,desc:'Invoice No 164',status:'Paid',sheet:'backfilling'},
+  {id:'i_b114',date:'2025-10-18',client:'NESMA-Dana',project:'',wo_vat:4200,vat:630,total:4830,desc:'Invoice No 166',status:'Paid',sheet:'backfilling'},
+  {id:'i_b115',date:'2025-10-22',client:'ALRAWY',project:'',wo_vat:4252.5,vat:637.875,total:4890.375,desc:'Invoice No 167',status:'Paid',sheet:'backfilling'},
+  {id:'i_b116',date:'2025-10-28',client:'ALRAWY',project:'',wo_vat:4275,vat:641.25,total:4916.25,desc:'Invoice No 168',status:'Paid',sheet:'backfilling'},
+  {id:'i_b117',date:'2025-10-28',client:'NESMA-Alhada',project:'',wo_vat:35537.32,vat:5330.598,total:40867.918,desc:'Invoice No 169',status:'Paid',sheet:'backfilling'},
+  {id:'i_b118',date:'2025-10-28',client:'ENJAZ-Rayan',project:'',wo_vat:1250,vat:187.5,total:1437.5,desc:'Invoice No 170',status:'Paid',sheet:'backfilling'},
+  {id:'i_b119',date:'2025-10-28',client:'NESMA-Bayonia',project:'',wo_vat:1739.13,vat:260.87,total:2000,desc:'Invoice No 171',status:'Paid',sheet:'backfilling'},
+  {id:'i_b120',date:'2025-10-29',client:'NESMA-Bayonia',project:'',wo_vat:13582,vat:2037.3,total:15619.3,desc:'Invoice No 172',status:'Paid',sheet:'backfilling'},
+  {id:'i_b121',date:'2025-11-03',client:'KHAMIS',project:'',wo_vat:23200,vat:3480,total:26680,desc:'Invoice No 173',status:'Paid',sheet:'backfilling'},
+  {id:'i_b122',date:'2025-11-03',client:'ENJAZ-RAK 16',project:'',wo_vat:15540,vat:2331,total:17871,desc:'Invoice No 174',status:'Pending',sheet:'backfilling'},
+  {id:'i_b123',date:'2025-11-04',client:'NESMA-Dana',project:'',wo_vat:20477.88,vat:3071.682,total:23549.562,desc:'Invoice No 175',status:'Paid',sheet:'backfilling'},
+  {id:'i_b124',date:'2025-11-04',client:'ENJAZ-Rayan',project:'',wo_vat:1250,vat:187.5,total:1437.5,desc:'Invoice No 176',status:'Pending',sheet:'backfilling'},
+  {id:'i_b125',date:'2025-11-05',client:'KHAMIS',project:'',wo_vat:17391.3,vat:2608.695,total:19999.995,desc:'Invoice No 177',status:'Paid',sheet:'backfilling'},
+  {id:'i_b126',date:'2025-11-06',client:'KHAMIS',project:'',wo_vat:43500,vat:6525,total:50025,desc:'Invoice No 178',status:'Paid',sheet:'backfilling'},
+  {id:'i_b127',date:'2025-11-08',client:'NESMA-Bayonia',project:'',wo_vat:2000,vat:300,total:2300,desc:'Invoice No 179',status:'Paid',sheet:'backfilling'},
+  {id:'i_b128',date:'2025-11-08',client:'KHAMIS',project:'',wo_vat:36540,vat:5481,total:42021,desc:'Invoice No 180',status:'Paid',sheet:'backfilling'},
+  {id:'i_b129',date:'2025-11-09',client:'NESMA-Bayonia',project:'',wo_vat:2400,vat:360,total:2760,desc:'Invoice No 181',status:'Paid',sheet:'backfilling'},
+  {id:'i_b130',date:'2025-11-09',client:'KHAMIS',project:'',wo_vat:17391.3,vat:2608.695,total:19999.995,desc:'Invoice No 182',status:'Paid',sheet:'backfilling'},
+  {id:'i_b131',date:'2025-11-12',client:'KHAMIS',project:'',wo_vat:60900,vat:9135,total:70035,desc:'Invoice No 183',status:'Paid',sheet:'backfilling'},
+  {id:'i_b132',date:'2025-11-15',client:'BMW',project:'',wo_vat:9910,vat:1486.5,total:11396.5,desc:'Invoice No 184',status:'Paid',sheet:'backfilling'},
+  {id:'i_b133',date:'2025-11-15',client:'KHAMIS',project:'',wo_vat:22620,vat:3393,total:26013,desc:'Invoice No 185',status:'Paid',sheet:'backfilling'},
+  {id:'i_b134',date:'2025-11-18',client:'KHAMIS',project:'',wo_vat:37410,vat:5611.5,total:43021.5,desc:'Invoice No 186',status:'Paid',sheet:'backfilling'},
+  {id:'i_b135',date:'2025-11-18',client:'KHAMIS B.C',project:'',wo_vat:13920,vat:2088,total:16008,desc:'Invoice No 187',status:'Paid',sheet:'backfilling'},
+  {id:'i_b136',date:'2025-11-18',client:'KHAMIS G.F',project:'',wo_vat:29580,vat:4437,total:34017,desc:'Invoice No 188',status:'Paid',sheet:'backfilling'},
+  {id:'i_b137',date:'2025-11-22',client:'KHAMIS',project:'',wo_vat:52200,vat:7830,total:60030,desc:'Invoice No 189',status:'Paid',sheet:'backfilling'},
+  {id:'i_b138',date:'2025-11-22',client:'KHAMIS G.F',project:'',wo_vat:15370,vat:2305.5,total:17675.5,desc:'Invoice No 190',status:'Paid',sheet:'backfilling'},
+  {id:'i_b139',date:'2025-11-24',client:'KHAMIS',project:'',wo_vat:12180,vat:1827,total:14007,desc:'Invoice No 191',status:'Paid',sheet:'backfilling'},
+  {id:'i_b140',date:'2025-11-24',client:'KHAMIS B.C',project:'',wo_vat:56840,vat:8526,total:65366,desc:'Invoice No 192',status:'Paid',sheet:'backfilling'},
+  {id:'i_b141',date:'2025-11-26',client:'KHAMIS B.C',project:'',wo_vat:60900,vat:9135,total:70035,desc:'Invoice No 193',status:'Paid',sheet:'backfilling'},
+  {id:'i_b142',date:'2025-11-26',client:'KHAMIS',project:'',wo_vat:20880,vat:3132,total:24012,desc:'Invoice No 194',status:'Paid',sheet:'backfilling'},
+  {id:'i_b143',date:'2025-11-26',client:'CHINA',project:'',wo_vat:450,vat:67.5,total:517.5,desc:'Invoice No 195',status:'Paid',sheet:'backfilling'},
+  {id:'i_b144',date:'2025-11-30',client:'KHAMIS',project:'',wo_vat:28710,vat:4306.5,total:33016.5,desc:'Invoice No 196',status:'Paid',sheet:'backfilling'},
+  {id:'i_b145',date:'2025-11-30',client:'KHAMIS G.F',project:'',wo_vat:13630,vat:2044.5,total:15674.5,desc:'Invoice No 197',status:'Paid',sheet:'backfilling'},
+  {id:'i_b146',date:'2025-12-06',client:'KHAMIS',project:'',wo_vat:24070,vat:3610.5,total:27680.5,desc:'Invoice No 198',status:'Paid',sheet:'backfilling'},
+  {id:'i_b147',date:'2025-12-06',client:'KHAMIS G.F',project:'',wo_vat:24070,vat:3610.5,total:27680.5,desc:'Invoice No 199',status:'Paid',sheet:'backfilling'},
+  {id:'i_b148',date:'2025-12-06',client:'NESMA-Bayonia',project:'',wo_vat:38005,vat:5700.75,total:43705.75,desc:'Invoice No 200',status:'Paid',sheet:'backfilling'},
+  {id:'i_b149',date:'2025-12-10',client:'NESMA-Alhada',project:'',wo_vat:46624,vat:6993.6,total:53617.6,desc:'Invoice No 201',status:'Pending',sheet:'backfilling'},
+  {id:'i_b150',date:'2025-12-14',client:'KHAMIS B.C',project:'',wo_vat:49880,vat:7482,total:57362,desc:'Invoice No 202',status:'Paid',sheet:'backfilling'},
+  {id:'i_b151',date:'2025-12-14',client:'KHAMIS',project:'',wo_vat:5800,vat:870,total:6670,desc:'Invoice No 203',status:'Paid',sheet:'backfilling'},
+  {id:'i_b152',date:'2025-12-20',client:'ALFANAR',project:'',wo_vat:19000,vat:2850,total:21850,desc:'Invoice No 204',status:'Paid',sheet:'backfilling'},
+  {id:'i_b153',date:'2026-01-08',client:'ALFANAR',project:'',wo_vat:37050,vat:5557.5,total:42607.5,desc:'Invoice No 210',status:'Paid',sheet:'backfilling'},
+  {id:'i_b154',date:'2026-01-14',client:'KHAMIS',project:'',wo_vat:12300,vat:1845,total:14145,desc:'Invoice No 212',status:'Paid',sheet:'backfilling'},
+  {id:'i_b155',date:'2026-01-14',client:'NESMA-ALHAFR',project:'',wo_vat:139646,vat:20946.9,total:160592.9,desc:'Invoice No 213',status:'Paid',sheet:'backfilling'},
+  {id:'i_b156',date:'2026-01-15',client:'KHAMIS',project:'',wo_vat:17400,vat:2610,total:20010,desc:'Invoice No 215',status:'Paid',sheet:'backfilling'},
+  {id:'i_b157',date:'2026-01-20',client:'NESMA-Bayonia',project:'',wo_vat:37278,vat:5591.7,total:42869.7,desc:'Invoice No 217',status:'Paid',sheet:'backfilling'},
+  {id:'i_b158',date:'2025-01-20',client:'SEMOU',project:'',wo_vat:9900,vat:1485,total:11385,desc:'Invoice No 218',status:'Paid',sheet:'backfilling'},
+  {id:'i_b159',date:'2026-01-22',client:'NESMA-DHAHRAN',project:'',wo_vat:49565,vat:7434.75,total:56999.75,desc:'Invoice No 219',status:'Pending',sheet:'backfilling'},
+  {id:'i_b160',date:'2026-01-26',client:'KHAMIS',project:'',wo_vat:61800,vat:9270,total:71070,desc:'Invoice No 220',status:'Paid',sheet:'backfilling'},
+  {id:'i_b161',date:'2026-01-28',client:'SEMOU',project:'',wo_vat:10000,vat:1500,total:11500,desc:'Invoice No 222',status:'Paid',sheet:'backfilling'},
+  {id:'i_b162',date:'2026-01-31',client:'KHAMIS',project:'',wo_vat:18000,vat:2700,total:20700,desc:'Invoice No 223',status:'Paid',sheet:'backfilling'},
+  {id:'i_b163',date:'2026-02-02',client:'ENJAZ-17',project:'',wo_vat:19563.48,vat:2934.522,total:22498.002,desc:'Invoice No 224',status:'Paid',sheet:'backfilling'},
+  {id:'i_b164',date:'2026-02-03',client:'KHAMIS',project:'',wo_vat:18900,vat:2835,total:21735,desc:'Invoice No 225',status:'Paid',sheet:'backfilling'},
+  {id:'i_b165',date:'2026-02-07',client:'SEMOU',project:'',wo_vat:8000,vat:1200,total:9200,desc:'Invoice No 226',status:'Paid',sheet:'backfilling'},
+  {id:'i_b166',date:'2026-02-07',client:'NESMA-Alhada',project:'',wo_vat:48010,vat:7201.5,total:55211.5,desc:'Invoice No 227',status:'Pending',sheet:'backfilling'},
+  {id:'i_b167',date:'2026-02-09',client:'KHAMIS',project:'',wo_vat:19200,vat:2880,total:22080,desc:'Invoice No 228',status:'Paid',sheet:'backfilling'},
+  {id:'i_b168',date:'2026-02-12',client:'SEMOU',project:'',wo_vat:5000,vat:750,total:5750,desc:'Invoice No 229',status:'Paid',sheet:'backfilling'},
+  {id:'i_b169',date:'2026-02-15',client:'NESMA-DHAHRAN',project:'',wo_vat:2173.91,vat:326.086,total:2499.996,desc:'Invoice No 230',status:'Paid',sheet:'backfilling'},
+  {id:'i_b170',date:'2026-02-16',client:'KHAMIS',project:'',wo_vat:5819,vat:872.85,total:6691.85,desc:'Invoice No 231',status:'Paid',sheet:'backfilling'},
+  {id:'i_b171',date:'2026-02-16',client:'KHAMIS',project:'',wo_vat:9000,vat:1350,total:10350,desc:'Invoice No 232',status:'Paid',sheet:'backfilling'},
+  {id:'i_b172',date:'2026-02-23',client:'SEMOU',project:'',wo_vat:10000,vat:1500,total:11500,desc:'Invoice No 233',status:'Pending',sheet:'backfilling'},
+  {id:'i_b173',date:'2026-03-26',client:'KHAMIS',project:'',wo_vat:12000,vat:1800,total:13800,desc:'Invoice No 237',status:'Paid',sheet:'backfilling'},
+  {id:'i_b174',date:'2026-03-26',client:'KHAMIS',project:'',wo_vat:51156,vat:7673.4,total:58829.4,desc:'Invoice No 238',status:'Paid',sheet:'backfilling'},
+  {id:'i_b175',date:'2026-04-06',client:'KHAMIS',project:'',wo_vat:3000,vat:450,total:3450,desc:'Invoice No 239',status:'Paid',sheet:'backfilling'},
+  {id:'i_b176',date:'2026-04-06',client:'KHAMIS',project:'',wo_vat:59508,vat:8926.2,total:68434.2,desc:'Invoice No 240',status:'Pending',sheet:'backfilling'},
+  {id:'i_b177',date:'2026-04-18',client:'KHAMIS',project:'',wo_vat:6600,vat:990,total:7590,desc:'Invoice No 245',status:'Paid',sheet:'backfilling'},
+  {id:'i_b178',date:'2026-04-18',client:'KHAMIS',project:'',wo_vat:39672,vat:5950.8,total:45622.8,desc:'Invoice No 246',status:'Pending',sheet:'backfilling'},
+  {id:'i_b179',date:'2026-04-18',client:'NESMA-DHAHRAN',project:'',wo_vat:17289.76,vat:2593.464,total:19883.224,desc:'Invoice No 247',status:'Pending',sheet:'backfilling'},
+  {id:'i_b180',date:'2026-04-18',client:'NESMA-Bayonia',project:'',wo_vat:34481,vat:5172.15,total:39653.15,desc:'Invoice No 248-250',status:'Pending',sheet:'backfilling'},
+  {id:'i_b181',date:'2026-04-18',client:'NESMA-Bayonia',project:'',wo_vat:17794,vat:2669.1,total:20463.1,desc:'Invoice No 249',status:'Pending',sheet:'backfilling'},
+  {id:'i_b182',date:'2026-04-23',client:'KHAMIS',project:'',wo_vat:2400,vat:360,total:2760,desc:'Invoice No 251',status:'Pending',sheet:'backfilling'},
+  {id:'i_b183',date:'2026-04-23',client:'KHAMIS',project:'',wo_vat:46980,vat:7047,total:54027,desc:'Invoice No 252',status:'Pending',sheet:'backfilling'},
+  {id:'i_b184',date:'2026-04-30',client:'ENJAZ-18',project:'',wo_vat:2244,vat:336.6,total:2580.6,desc:'Invoice No 255',status:'Pending',sheet:'backfilling'},
+  {id:'i_b185',date:'2026-05-07',client:'KHAMIS',project:'',wo_vat:19500,vat:2925,total:22425,desc:'Invoice No 257',status:'Pending',sheet:'backfilling'},
+  {id:'i_b186',date:'2026-05-07',client:'KHAMIS',project:'',wo_vat:20880,vat:3132,total:24012,desc:'Invoice No 258',status:'Pending',sheet:'backfilling'},
+  {id:'i_b187',date:'2026-05-08',client:'KHAMIS',project:'',wo_vat:34500,vat:5175,total:39675,desc:'Invoice No 263',status:'Pending',sheet:'backfilling'},
+  {id:'i_b188',date:'2026-05-08',client:'KHAMIS',project:'',wo_vat:8874,vat:1331.1,total:10205.1,desc:'Invoice No 264',status:'Pending',sheet:'backfilling'}
+];
+
+const SEED_E = [
+  {id:'e_eq1',date:'2024-01-13',client:'',project:'Equipment',supplier:'AlAhmed',amount:46050,desc:'For Rbi Crane - AlAhmed',type:'equipment',sheet:'equipment'},
+  {id:'e_eq2',date:'2024-07-04',client:'',project:'Equipment',supplier:'',amount:1300,desc:'Paid for pump truck supplier',type:'equipment',sheet:'equipment'},
+  {id:'e_eq3',date:'2024-07-18',client:'',project:'Equipment',supplier:'SALEH',amount:7000,desc:'RBI Crane (1) - SALEH',type:'equipment',sheet:'equipment'},
+  {id:'e_eq4',date:'2024-07-19',client:'',project:'Equipment',supplier:'Gulam',amount:3200,desc:'AND Crane - Gulam',type:'equipment',sheet:'equipment'},
+  {id:'e_eq5',date:'2024-07-22',client:'',project:'NESMA',supplier:'',amount:1000,desc:'Forklift-Nesma',type:'equipment',sheet:'equipment'},
+  {id:'e_eq6',date:'2024-07-24',client:'',project:'Equipment',supplier:'SHALL',amount:2400,desc:'AND Crane - SHALL',type:'equipment',sheet:'equipment'},
+  {id:'e_eq7',date:'2024-07-25',client:'',project:'Equipment',supplier:'SALEH',amount:1000,desc:'RBI Crane (1) - SALEH',type:'equipment',sheet:'equipment'},
+  {id:'e_eq8',date:'2024-07-28',client:'',project:'Admin',supplier:'',amount:350,desc:'Riyadh Chamber',type:'admin',sheet:'equipment'},
+  {id:'e_eq9',date:'2024-07-30',client:'',project:'Equipment',supplier:'',amount:1500,desc:'For Morgan Rasasa - Abo Sultan',type:'equipment',sheet:'equipment'},
+  {id:'e_eq10',date:'2024-08-06',client:'',project:'Equipment',supplier:'SALEH',amount:9000,desc:'RBI Crane (1) - SALEH',type:'equipment',sheet:'equipment'},
+  {id:'e_eq11',date:'2024-08-19',client:'',project:'Equipment',supplier:'SALEH',amount:3000,desc:'RBI Crane (1) - SALEH',type:'equipment',sheet:'equipment'},
+  {id:'e_eq12',date:'2024-08-21',client:'',project:'Equipment',supplier:'SALEH',amount:5000,desc:'RBI Crane (1) - SALEH',type:'equipment',sheet:'equipment'},
+  {id:'e_eq13',date:'2024-08-21',client:'',project:'Equipment',supplier:'AlAhmed',amount:41400,desc:'Thq Crane - AlAhmed',type:'equipment',sheet:'equipment'},
+  {id:'e_eq14',date:'2024-08-26',client:'',project:'Equipment',supplier:'SALEH',amount:3000,desc:'RBI Crane (1) - SALEH - Final',type:'equipment',sheet:'equipment'},
+  {id:'e_eq15',date:'2024-10-16',client:'',project:'Equipment',supplier:'Falah',amount:29722.9,desc:'AND Crane - Falah',type:'equipment',sheet:'equipment'},
+  {id:'e_eq16',date:'2024-11-30',client:'',project:'Equipment',supplier:'Falah',amount:8491.6,desc:'AND Crane - Falah',type:'equipment',sheet:'equipment'},
+  {id:'e_eq17',date:'2024-12-14',client:'',project:'Equipment',supplier:'AlAhmed',amount:57500,desc:'Rbi Crane - AlAhmed',type:'equipment',sheet:'equipment'},
+  {id:'e_eq18',date:'2025-01-02',client:'',project:'ENJAZ',supplier:'',amount:1300,desc:'Poklain for Enjaz Talaat',type:'equipment',sheet:'equipment'},
+  {id:'e_eq19',date:'2025-02-09',client:'',project:'ALS/RABIA',supplier:'',amount:6075,desc:'ALS forklift FOR RABIA site',type:'equipment',sheet:'equipment'},
+  {id:'e_eq20',date:'2025-03-13',client:'',project:'ENJAZ',supplier:'',amount:10950,desc:'Pobcat for Enjaz Talaat March',type:'equipment',sheet:'equipment'},
+  {id:'e_eq21',date:'2025-03-13',client:'',project:'ENJAZ',supplier:'',amount:7500,desc:'Pobcat for Enjaz Talaat April',type:'equipment',sheet:'equipment'},
+  {id:'e_eq22',date:'2025-07-20',client:'',project:'ALS',supplier:'',amount:6500,desc:'ALS Company Crane 100T',type:'equipment',sheet:'equipment'},
+  {id:'e_eq23',date:'2024-01-01',client:'',project:'Other',supplier:'',amount:-650,desc:'Tabuk adjustment',type:'other',sheet:'equipment'},
+  {id:'e_eq24',date:'2026-05-20',client:'',project:'ALS',supplier:'',amount:30000,desc:'ALS Company Crane 700T',type:'equipment',sheet:'equipment'},
+  {id:'e_b1',date:'2024-03-28',client:'',project:'Supplier',supplier:'Abo Wael',amount:7000,desc:'Abo Wael - General Fill',type:'labor',sheet:'backfilling'},
+  {id:'e_b2',date:'2024-04-20',client:'',project:'Supplier',supplier:'Abo Abdulrahman',amount:2500,desc:'Abo Abdulrahman',type:'labor',sheet:'backfilling'},
+  {id:'e_b3',date:'2024-04-28',client:'',project:'Supplier',supplier:'Abo Wael',amount:5000,desc:'Abo Wael - General Fill',type:'labor',sheet:'backfilling'},
+  {id:'e_b4',date:'2024-06-19',client:'',project:'Supplier',supplier:'Abo Wael',amount:4000,desc:'Abo Wael - General Fill',type:'labor',sheet:'backfilling'},
+  {id:'e_b5',date:'2024-06-30',client:'',project:'Supplier',supplier:'Abo Wael',amount:10000,desc:'Abo Wael - General Fill',type:'labor',sheet:'backfilling'},
+  {id:'e_b6',date:'2024-07-07',client:'',project:'Supplier',supplier:'Abo Wael',amount:5000,desc:'Abo Wael - General Fill',type:'labor',sheet:'backfilling'},
+  {id:'e_b7',date:'2024-07-18',client:'',project:'Supplier',supplier:'Abo Wael',amount:20000,desc:'Abo Wael - General Fill',type:'labor',sheet:'backfilling'},
+  {id:'e_b8',date:'2024-07-30',client:'',project:'Supplier',supplier:'Abo Wael',amount:5000,desc:'Abo Wael - General Fill',type:'labor',sheet:'backfilling'},
+  {id:'e_b9',date:'2024-08-01',client:'',project:'Supplier',supplier:'Abo Wael',amount:10000,desc:'Abo Wael - Sub Base',type:'labor',sheet:'backfilling'},
+  {id:'e_b10',date:'2024-08-01',client:'',project:'Admin',supplier:'',amount:150,desc:'Forman',type:'admin',sheet:'backfilling'},
+  {id:'e_b11',date:'2024-08-12',client:'',project:'Supplier',supplier:'Abo Wael',amount:20000,desc:'Abo Wael - Sub Base',type:'labor',sheet:'backfilling'},
+  {id:'e_b12',date:'2024-08-12',client:'',project:'Admin',supplier:'Nizam',amount:850,desc:'Nizam - Basecourse sample - Lecon',type:'other',sheet:'backfilling'},
+  {id:'e_b13',date:'2024-08-19',client:'',project:'Supplier',supplier:'Abo Wael',amount:5000,desc:'Abo Wael - Sub Base',type:'labor',sheet:'backfilling'},
+  {id:'e_b14',date:'2024-08-21',client:'',project:'Intelligent',supplier:'Nizam',amount:4250,desc:'Nizam - Basecourse',type:'other',sheet:'backfilling'},
+  {id:'e_b15',date:'2024-08-26',client:'',project:'Intelligent',supplier:'Nizam',amount:2550,desc:'Nizam - Basecourse',type:'other',sheet:'backfilling'},
+  {id:'e_b16',date:'2024-08-26',client:'',project:'Supplier',supplier:'Abo Wael',amount:5000,desc:'Abo Wael - Sub Base',type:'labor',sheet:'backfilling'},
+  {id:'e_b17',date:'2024-08-27',client:'',project:'Supplier',supplier:'Abo Wael',amount:2500,desc:'Abo Wael - General Fill',type:'labor',sheet:'backfilling'},
+  {id:'e_b18',date:'2024-08-31',client:'',project:'Supplier',supplier:'Abo Wael',amount:5000,desc:'Abo Wael - General Fill',type:'labor',sheet:'backfilling'},
+  {id:'e_b19',date:'2024-09-05',client:'',project:'Supplier',supplier:'Abo Wael',amount:3000,desc:'Abo Wael - General Fill',type:'labor',sheet:'backfilling'},
+  {id:'e_b20',date:'2024-09-29',client:'',project:'Supplier',supplier:'Abo Wael',amount:5000,desc:'Abo Wael - General Fill',type:'labor',sheet:'backfilling'},
+  {id:'e_b21',date:'2024-09-30',client:'',project:'Admin',supplier:'Mohsen Accountant',amount:700,desc:'Mohsen Accountant',type:'admin',sheet:'backfilling'},
+  {id:'e_b22',date:'2024-10-01',client:'',project:'Supplier',supplier:'Abo Wael',amount:5000,desc:'Abo Wael - General Fill',type:'labor',sheet:'backfilling'},
+  {id:'e_b23',date:'2024-10-06',client:'',project:'ENJAZ 1-RAK',supplier:'',amount:20200,desc:'ENJAZ-RAKA 1',type:'labor',sheet:'backfilling'},
+  {id:'e_b24',date:'2024-10-07',client:'',project:'ENJAZ 2-RAK',supplier:'',amount:22355,desc:'ENJAZ-RAKA 2',type:'labor',sheet:'backfilling'},
+  {id:'e_b25',date:'2024-10-06',client:'',project:'Other',supplier:'Nizam',amount:2250,desc:'Nizam - Basecourse',type:'other',sheet:'backfilling'},
+  {id:'e_b26',date:'2024-10-07',client:'',project:'Supplier',supplier:'Abo Abdulrahman',amount:1500,desc:'Abo Abdulrahman',type:'labor',sheet:'backfilling'},
+  {id:'e_b27',date:'2024-10-13',client:'',project:'Other',supplier:'',amount:40500,desc:'Jihan street',type:'other',sheet:'backfilling'},
+  {id:'e_b28',date:'2024-10-17',client:'',project:'Intelligent',supplier:'Nizam',amount:7650,desc:'Nizam Basecourse Intelligent',type:'other',sheet:'backfilling'},
+  {id:'e_b29',date:'2024-10-18',client:'',project:'Admin',supplier:'Mohamed Mostafa',amount:1000,desc:'Mohamed Mostafa',type:'admin',sheet:'backfilling'},
+  {id:'e_b30',date:'2024-10-31',client:'',project:'Intelligent',supplier:'Altair',amount:177330,desc:'Altair Basecourse Intelligent',type:'other',sheet:'backfilling'},
+  {id:'e_b31',date:'2024-10-31',client:'',project:'Intelligent',supplier:'Mohamed Mostafa',amount:13264,desc:'Mohamed Mostafa Final Defaa',type:'labor',sheet:'backfilling'},
+  {id:'e_b32',date:'2024-10-31',client:'',project:'ENJAZ 3-RAK',supplier:'',amount:6760,desc:'ENJAZ-RAKA 3',type:'labor',sheet:'backfilling'},
+  {id:'e_b33',date:'2024-11-02',client:'',project:'Supplier',supplier:'Abo Abdulrahman',amount:5500,desc:'Abo Abdulrahman',type:'labor',sheet:'backfilling'},
+  {id:'e_b34',date:'2024-11-01',client:'',project:'Admin',supplier:'Mohsen Accountant',amount:1000,desc:'Mohsen Accountant',type:'admin',sheet:'backfilling'},
+  {id:'e_b35',date:'2024-11-08',client:'',project:'ENJAZ 4-RAK',supplier:'',amount:32757,desc:'ENJAZ 4-RAK',type:'labor',sheet:'backfilling'},
+  {id:'e_b36',date:'2024-11-16',client:'',project:'Other',supplier:'Nizam',amount:138200,desc:'Nizam GF+BC-Defaa',type:'labor',sheet:'backfilling'},
+  {id:'e_b37',date:'2024-11-16',client:'',project:'Other',supplier:'Billal',amount:31590,desc:'Billal GF+BC-Defaa',type:'labor',sheet:'backfilling'},
+  {id:'e_b38',date:'2024-11-17',client:'',project:'Other',supplier:'Fakhama',amount:12000,desc:'Fakhama BC-Defaa',type:'other',sheet:'backfilling'},
+  {id:'e_b39',date:'2024-11-17',client:'',project:'Other',supplier:'',amount:31305,desc:'Defaa',type:'other',sheet:'backfilling'},
+  {id:'e_b40',date:'2024-11-17',client:'',project:'ENJAZ 2-AZIZ',supplier:'',amount:61219,desc:'ENJAZ 2-AZIZ',type:'labor',sheet:'backfilling'},
+  {id:'e_b41',date:'2024-11-17',client:'',project:'ENJAZ 5-RAK',supplier:'',amount:35886,desc:'ENJAZ 5-RAK',type:'labor',sheet:'backfilling'},
+  {id:'e_b42',date:'2024-11-26',client:'',project:'ENJAZ 6-RAK',supplier:'',amount:8260,desc:'ENJAZ 6-RAK',type:'labor',sheet:'backfilling'},
+  {id:'e_b43',date:'2024-12-02',client:'',project:'ENJAZ 7-RAK',supplier:'',amount:3850,desc:'ENJAZ 7-RAK',type:'labor',sheet:'backfilling'},
+  {id:'e_b44',date:'2024-12-02',client:'',project:'Admin',supplier:'Mohsen Accountant',amount:500,desc:'Mohsen Accountant',type:'admin',sheet:'backfilling'},
+  {id:'e_b45',date:'2024-12-03',client:'',project:'Supplier',supplier:'Abo Abdulrahman',amount:2000,desc:'Abo Abdulrahman',type:'labor',sheet:'backfilling'},
+  {id:'e_b46',date:'2024-12-03',client:'',project:'Admin',supplier:'',amount:4000,desc:'Salary for saudization',type:'admin',sheet:'backfilling'},
+  {id:'e_b47',date:'2024-12-03',client:'',project:'NESMA',supplier:'',amount:3300,desc:'Profit Diff by Nesma',type:'other',sheet:'backfilling'},
+  {id:'e_b48',date:'2024-12-05',client:'',project:'ENJAZ 8-RAK',supplier:'',amount:2400,desc:'ENJAZ 8-RAK',type:'labor',sheet:'backfilling'},
+  {id:'e_b49',date:'2024-12-14',client:'',project:'ENJAZ 9-RAK',supplier:'',amount:14375,desc:'ENJAZ 9-RAK',type:'labor',sheet:'backfilling'},
+  {id:'e_b50',date:'2024-12-24',client:'',project:'ENJAZ 10-RAK',supplier:'',amount:20965,desc:'ENJAZ 10-RAK',type:'labor',sheet:'backfilling'},
+  {id:'e_b51',date:'2024-06-01',client:'',project:'ENJAZ 11-RAK',supplier:'',amount:13910,desc:'ENJAZ 11-RAK',type:'labor',sheet:'backfilling'},
+  {id:'e_b52',date:'2024-06-01',client:'',project:'NESMA',supplier:'',amount:1253841,desc:'(GF+BC-Defaa) مجموع مدفوعات الباطن NESMA',type:'labor',sheet:'backfilling'},
+  {id:'e_b53',date:'2025-01-09',client:'',project:'VAT',supplier:'',amount:315550,desc:'Payment for VAT Refunds',type:'vat',sheet:'backfilling'},
+  {id:'e_b54',date:'2025-01-09',client:'',project:'Admin',supplier:'',amount:11149,desc:'Company fees Dec 2024',type:'admin',sheet:'backfilling'},
+  {id:'e_b55',date:'2025-01-19',client:'',project:'ENJAZ 12-RAK',supplier:'',amount:2470,desc:'ENJAZ 12-RAK',type:'labor',sheet:'backfilling'},
+  {id:'e_b56',date:'2025-01-28',client:'',project:'ENJAZ-Qalaa',supplier:'',amount:43500,desc:'ENJAZ-Qalaa Stone',type:'other',sheet:'backfilling'},
+  {id:'e_b57',date:'2025-01-30',client:'',project:'Other',supplier:'Mohamed Mostafa',amount:57350,desc:'Mohamed Mostafa Defaa',type:'other',sheet:'backfilling'},
+  {id:'e_b58',date:'2025-01-30',client:'',project:'ENJAZ-Qalaa',supplier:'',amount:13150,desc:'ENJAZ-Qalaa Basecourse',type:'other',sheet:'backfilling'},
+  {id:'e_b59',date:'2025-02-10',client:'',project:'ENJAZ 2-AZIZ',supplier:'',amount:4180,desc:'ENJAZ 2-AZIZ',type:'labor',sheet:'backfilling'},
+  {id:'e_b60',date:'2025-02-11',client:'',project:'ENJAZ 13-RAK',supplier:'',amount:15100,desc:'ENJAZ 13-RAK',type:'labor',sheet:'backfilling'},
+  {id:'e_b61',date:'2025-02-20',client:'',project:'Admin',supplier:'',amount:7085,desc:'Company fees Jan 2025 - 5% of invoices',type:'admin',sheet:'backfilling'},
+  {id:'e_b62',date:'2025-02-20',client:'',project:'Admin',supplier:'',amount:22200,desc:'Company fees Defaa - 10% of profit',type:'admin',sheet:'backfilling'},
+  {id:'e_b63',date:'2025-03-07',client:'',project:'Admin',supplier:'',amount:4733,desc:'Company fees Feb 2025 - 10%',type:'admin',sheet:'backfilling'},
+  {id:'e_b64',date:'2025-03-23',client:'',project:'ENJAZ 15-RAK',supplier:'',amount:7200,desc:'ENJAZ 15-RAK',type:'labor',sheet:'backfilling'},
+  {id:'e_b65',date:'2025-03-24',client:'',project:'ENJAZ-Qalaa',supplier:'',amount:10875,desc:'ENJAZ-Qalaa GF',type:'other',sheet:'backfilling'},
+  {id:'e_b66',date:'2025-04-08',client:'',project:'Admin',supplier:'',amount:5821.598,desc:'Company fees March 2025 - 10%',type:'admin',sheet:'backfilling'},
+  {id:'e_b67',date:'2025-05-06',client:'',project:'Admin',supplier:'',amount:5000,desc:'Company fees April 2025 - 10%',type:'admin',sheet:'backfilling'},
+  {id:'e_b68',date:'2025-05-14',client:'',project:'MASHREQ-Rak',supplier:'',amount:23510,desc:'MASHREQ-Rak supplier',type:'labor',sheet:'backfilling'},
+  {id:'e_b69',date:'2025-05-26',client:'',project:'NESMA-Dana',supplier:'',amount:115600.25,desc:'Nesma-Dana supplier',type:'labor',sheet:'backfilling'},
+  {id:'e_b70',date:'2025-06-07',client:'',project:'ENJAZ-RAK New',supplier:'',amount:14950,desc:'ENJAZ-RAK NEW',type:'labor',sheet:'backfilling'},
+  {id:'e_b71',date:'2025-06-07',client:'',project:'Running',supplier:'',amount:8248,desc:'Running cost July 2025',type:'running',sheet:'backfilling'},
+  {id:'e_b72',date:'2025-08-01',client:'',project:'Running',supplier:'',amount:9973,desc:'Running cost Aug 2025',type:'running',sheet:'backfilling'},
+  {id:'e_b73',date:'2025-06-08',client:'',project:'Other',supplier:'Mohamed Mostafa',amount:3000,desc:'Mohamed Mostafa Hada',type:'other',sheet:'backfilling'},
+  {id:'e_b74',date:'2025-06-21',client:'',project:'ENJAZ-Qalaa1',supplier:'',amount:6000,desc:'ENJAZ-Qalaa1',type:'labor',sheet:'backfilling'},
+  {id:'e_b75',date:'2025-06-21',client:'',project:'Equipment',supplier:'',amount:23800,desc:'Car & Compactor',type:'equipment',sheet:'backfilling'},
+  {id:'e_b76',date:'2025-06-21',client:'',project:'NESMA-BAHR',supplier:'',amount:89336.75,desc:'NESMA-BAHR supplier',type:'labor',sheet:'backfilling'},
+  {id:'e_b77',date:'2025-06-21',client:'',project:'NESMA-Bayonia',supplier:'',amount:303500.5,desc:'NESMA-Bayonia supplier',type:'labor',sheet:'backfilling'},
+  {id:'e_b78',date:'2025-06-21',client:'',project:'NESMA-Alhada',supplier:'',amount:252766.5,desc:'NESMA-Alhada supplier',type:'labor',sheet:'backfilling'},
+  {id:'e_b79',date:'2025-07-01',client:'',project:'Admin',supplier:'',amount:5000,desc:'Company fees May-Jun 2025 - 10%',type:'admin',sheet:'backfilling'},
+  {id:'e_b80',date:'2025-08-30',client:'',project:'ENJAZ-Sheraa',supplier:'',amount:14800,desc:'ENJAZ-Sheraa',type:'labor',sheet:'backfilling'},
+  {id:'e_b81',date:'2025-09-15',client:'',project:'ENJAZ-Rayan',supplier:'',amount:6550,desc:'ENJAZ-Rayan',type:'labor',sheet:'backfilling'},
+  {id:'e_b82',date:'2025-09-15',client:'',project:'NESMA-DHAHRAN',supplier:'',amount:73596.75,desc:'NESMA-DHAHRAN supplier',type:'labor',sheet:'backfilling'},
+  {id:'e_b83',date:'2025-09-15',client:'',project:'SALMAN-BAHR',supplier:'',amount:34020,desc:'SALMAN-ALBAHR supplier',type:'labor',sheet:'backfilling'},
+  {id:'e_b84',date:'2025-09-20',client:'',project:'Running',supplier:'',amount:7936,desc:'Running cost Sep 2025',type:'running',sheet:'backfilling'},
+  {id:'e_b85',date:'2025-10-01',client:'',project:'Admin',supplier:'',amount:15000,desc:'Company fees Jul-Sep 2025 - 10%',type:'admin',sheet:'backfilling'},
+  {id:'e_b86',date:'2025-10-22',client:'',project:'ALRAWY',supplier:'',amount:7690,desc:'ALRAWY supplier',type:'labor',sheet:'backfilling'},
+  {id:'e_b87',date:'2025-10-22',client:'',project:'Running',supplier:'',amount:7428,desc:'Running cost Oct 2025',type:'running',sheet:'backfilling'},
+  {id:'e_b88',date:'2025-10-30',client:'',project:'ENJAZ-RAK 16',supplier:'',amount:11345,desc:'ENJAZ-RAK 16',type:'labor',sheet:'backfilling'},
+  {id:'e_b89',date:'2025-10-30',client:'',project:'KHAMIS',supplier:'',amount:959603,desc:'KHAMIS supplier payment',type:'labor',sheet:'backfilling'},
+  {id:'e_b90',date:'2025-11-01',client:'',project:'Running',supplier:'',amount:9118,desc:'Running cost NOV 2025',type:'running',sheet:'backfilling'},
+  {id:'e_b91',date:'2025-11-14',client:'',project:'BMW',supplier:'',amount:5020,desc:'BMW',type:'other',sheet:'backfilling'},
+  {id:'e_b92',date:'2025-11-20',client:'',project:'Admin',supplier:'',amount:13000,desc:'Company fees Oct-Nov 2025 - 10%',type:'admin',sheet:'backfilling'},
+  {id:'e_b93',date:'2025-12-15',client:'',project:'NESMA-ALHAFR',supplier:'',amount:124737,desc:'NESMA-ALHAFR supplier',type:'labor',sheet:'backfilling'},
+  {id:'e_b94',date:'2025-12-15',client:'',project:'Running',supplier:'',amount:10395,desc:'Running cost Dec 2025',type:'running',sheet:'backfilling'},
+  {id:'e_b95',date:'2025-12-15',client:'',project:'ALFANAR',supplier:'',amount:53370,desc:'ALFANAR supplier',type:'labor',sheet:'backfilling'},
+  {id:'e_b96',date:'2025-12-19',client:'',project:'ENJAZ-17',supplier:'',amount:17480,desc:'ENJAZ-17',type:'labor',sheet:'backfilling'},
+  {id:'e_b97',date:'2025-12-20',client:'',project:'Admin',supplier:'',amount:6000,desc:'Company fees Dec 2025 - 10%',type:'admin',sheet:'backfilling'},
+  {id:'e_b98',date:'2026-01-01',client:'',project:'Running',supplier:'',amount:8235,desc:'Running cost JAN 2026',type:'running',sheet:'backfilling'},
+  {id:'e_b99',date:'2026-01-20',client:'',project:'SEMOU',supplier:'',amount:36350,desc:'SEMOU supplier',type:'labor',sheet:'backfilling'},
+  {id:'e_b100',date:'2026-01-24',client:'',project:'Other',supplier:'',amount:-600,desc:'FARGALY adjustment',type:'other',sheet:'backfilling'},
+  {id:'e_b101',date:'2026-01-25',client:'',project:'Other',supplier:'',amount:13850,desc:'Sahar',type:'other',sheet:'backfilling'},
+  {id:'e_b102',date:'2026-01-25',client:'',project:'Running',supplier:'',amount:7961,desc:'Running cost FEB 2026',type:'running',sheet:'backfilling'},
+  {id:'e_b103',date:'2026-01-25',client:'',project:'Admin',supplier:'',amount:13000,desc:'Company fees Feb-Mar 2026 - 10%',type:'admin',sheet:'backfilling'},
+  {id:'e_b104',date:'2026-02-15',client:'',project:'Admin',supplier:'',amount:5000,desc:'Company fees Jan 2026 - 10%',type:'admin',sheet:'backfilling'},
+  {id:'e_b105',date:'2026-03-31',client:'',project:'Running',supplier:'',amount:10223,desc:'Running cost MAR 2026',type:'running',sheet:'backfilling'},
+  {id:'e_b106',date:'2026-04-23',client:'',project:'Other',supplier:'',amount:-4885,desc:'Taybah adjustment',type:'other',sheet:'backfilling'},
+  {id:'e_b107',date:'2026-04-27',client:'',project:'Admin',supplier:'',amount:5000,desc:'Company fees April 2026 - 10%',type:'admin',sheet:'backfilling'},
+  {id:'e_b108',date:'2026-04-27',client:'',project:'Running',supplier:'',amount:11475,desc:'Running cost April 2026',type:'running',sheet:'backfilling'},
+  {id:'e_b109',date:'2026-04-30',client:'',project:'ENJAZ-18',supplier:'',amount:1440,desc:'ENJAZ-18',type:'labor',sheet:'backfilling'},
+  {id:'e_b110',date:'2026-05-08',client:'',project:'Admin',supplier:'',amount:5000,desc:'Company fees May 2026 - 10%',type:'admin',sheet:'backfilling'},
+  {id:'e_b111',date:'2026-05-08',client:'',project:'Running',supplier:'',amount:2188,desc:'Running cost May 2026',type:'running',sheet:'backfilling'}
+];
+
+const SEED_P = [
+  {id:'p01',date:'2024-07-01',type:'supplier',supplier:'Main Supplier',wo_vat:600000,vat:90000,total:690000,desc:'Supplier invoice 01',status:'Refundable'},
+  {id:'p02',date:'2024-07-01',type:'supplier',supplier:'Main Supplier',wo_vat:668000,vat:100200,total:768200,desc:'Supplier invoice 02',status:'Refundable'},
+  {id:'p03',date:'2024-07-01',type:'supplier',supplier:'Main Supplier',wo_vat:640000,vat:96000,total:736000,desc:'Supplier invoice 03',status:'Refundable'},
+  {id:'p04',date:'2024-07-01',type:'supplier',supplier:'Main Supplier',wo_vat:128000,vat:19200,total:147200,desc:'Supplier invoice 04',status:'Refundable'},
+  {id:'p05',date:'2024-07-01',type:'supplier',supplier:'Main Supplier',wo_vat:106685,vat:16002.75,total:122687.75,desc:'Supplier invoice 05',status:'Refundable'},
+  {id:'p06',date:'2024-07-01',type:'supplier',supplier:'Main Supplier',wo_vat:70000,vat:10500,total:80500,desc:'Supplier invoice 06',status:'Refundable'},
+  {id:'p07',date:'2024-07-01',type:'supplier',supplier:'Main Supplier',wo_vat:300013.33,vat:45002,total:345015.33,desc:'Supplier invoice 07',status:'Refundable'},
+  {id:'p08',date:'2024-07-01',type:'supplier',supplier:'Main Supplier',wo_vat:333365,vat:50004.75,total:383369.75,desc:'Supplier invoice 08',status:'Refundable'},
+  {id:'p09',date:'2024-07-01',type:'supplier',supplier:'Main Supplier',wo_vat:134008,vat:20101.2,total:154109.2,desc:'Supplier invoice 09',status:'Refundable'},
+  {id:'p10',date:'2024-07-01',type:'supplier',supplier:'Main Supplier',wo_vat:76015,vat:11402.25,total:87417.25,desc:'Supplier invoice 10',status:'Refundable'},
+  {id:'p11',date:'2024-07-01',type:'supplier',supplier:'Main Supplier',wo_vat:104045,vat:15606.75,total:119651.75,desc:'Supplier invoice 11',status:'Refundable'},
+  {id:'p12',date:'2024-07-01',type:'supplier',supplier:'Main Supplier',wo_vat:167056,vat:25058.4,total:192114.4,desc:'Supplier invoice 12',status:'Refundable'},
+  {id:'p13',date:'2024-07-01',type:'supplier',supplier:'Main Supplier',wo_vat:120000,vat:18000,total:138000,desc:'Supplier invoice 13',status:'Refundable'}
+];
+
+const SEED_VP = [
+  {id:'vp1',date:'2024-09-30',amount:24877.71,desc:'VAT payment to ZATCA - Q3 2024',period:'Q3 2024'},
+  {id:'vp2',date:'2024-12-31',amount:25302.32,desc:'VAT payment to ZATCA - Q4 2024',period:'Q4 2024'},
+  {id:'vp3',date:'2025-03-31',amount:7961.10,desc:'VAT payment to ZATCA - Q1 2025',period:'Q1 2025'},
+  {id:'vp4',date:'2025-06-30',amount:6280.00,desc:'VAT payment to ZATCA - Q2 2025',period:'Q2 2025'},
+  {id:'vp5',date:'2025-09-30',amount:732.00,desc:'VAT payment to ZATCA - Q3 2025',period:'Q3 2025'},
+  {id:'vp6',date:'2025-12-31',amount:5820.00,desc:'VAT payment to ZATCA - Q4 2025',period:'Q4 2025'},
+  {id:'vp7',date:'2026-03-31',amount:4000.00,desc:'VAT payment to ZATCA - Q1 2026',period:'Q1 2026'}
+];
+
+
+// ─── MASTER DATA LISTS ─────────────────────────────────────────────────────
+const SEED_DATA = {
+  clients:  ["ALFANAR", "ALRAWY", "ALS", "ALS/RABIA", "BMW", "CHINA", "ENJAZ", "ENJAZ 1-RAK", "ENJAZ 10-RAK", "ENJAZ 11-RAK", "ENJAZ 12-RAK", "ENJAZ 13-RAK", "ENJAZ 15-RAK", "ENJAZ 2-AZIZ", "ENJAZ 2-RAK", "ENJAZ 3-RAK", "ENJAZ 4-RAK", "ENJAZ 5-RAK", "ENJAZ 6-RAK", "ENJAZ 7-RAK", "ENJAZ 8-RAK", "ENJAZ 9-RAK", "ENJAZ-17", "ENJAZ-18", "ENJAZ-Qalaa", "ENJAZ-Qalaa1", "ENJAZ-RAK", "ENJAZ-RAK 16", "ENJAZ-RAK New", "ENJAZ-Rayan", "ENJAZ-Sheraa", "Equipment", "Hada-Bahr", "Intelligent", "KHAMIS", "KHAMIS B.C", "KHAMIS G.F", "Lecon", "MASHREQ-Rak", "NESMA", "NESMA-ALHAFR", "NESMA-Alhada", "NESMA-BAHR", "NESMA-Bayonia", "NESMA-DHAHRAN", "NESMA-Dana", "SALMAN-BAHR/HADA", "SEMOU", "TAJ"],
+  suppliers: ["Abo Abdulrahman", "Abo Wael", "Altair", "Billal", "Fakhama", "Main Supplier", "Mohamed Mostafa", "Mohsen Accountant", "Nizam"],
+  projects:  ["ALFANAR", "ALRAWY", "ALS", "ALS/RABIA", "Admin", "BMW", "ENJAZ", "ENJAZ 1-RAK", "ENJAZ 10-RAK", "ENJAZ 11-RAK", "ENJAZ 12-RAK", "ENJAZ 13-RAK", "ENJAZ 15-RAK", "ENJAZ 2-AZIZ", "ENJAZ 2-RAK", "ENJAZ 3-RAK", "ENJAZ 4-RAK", "ENJAZ 5-RAK", "ENJAZ 6-RAK", "ENJAZ 7-RAK", "ENJAZ 8-RAK", "ENJAZ 9-RAK", "ENJAZ-17", "ENJAZ-18", "ENJAZ-Qalaa", "ENJAZ-Qalaa1", "ENJAZ-RAK 16", "ENJAZ-RAK New", "ENJAZ-Rayan", "ENJAZ-Sheraa", "Equipment", "Intelligent", "KHAMIS", "MASHREQ-Rak", "NESMA", "NESMA-ALHAFR", "NESMA-Alhada", "NESMA-BAHR", "NESMA-Bayonia", "NESMA-DHAHRAN", "NESMA-Dana", "Other", "Running", "SALMAN-BAHR", "SEMOU", "Supplier", "VAT"],
+  expTypes:  [{"id": "equipment", "label": "Equipment / \u0645\u0639\u062f\u0627\u062a"}, {"id": "labor", "label": "Labor / \u0639\u0645\u0627\u0644\u0629 \u0648\u0645\u0648\u0631\u062f\u0648\u0646"}, {"id": "admin", "label": "Admin / \u0645\u0635\u0631\u0648\u0641\u0627\u062a \u0625\u062f\u0627\u0631\u064a\u0629"}, {"id": "running", "label": "Running cost / \u0645\u0635\u0627\u0631\u064a\u0641 \u062a\u0634\u063a\u064a\u0644"}, {"id": "materials", "label": "Materials / \u0645\u0648\u0627\u062f"}, {"id": "vat", "label": "VAT payment / \u062f\u0641\u0639 \u0636\u0631\u064a\u0628\u0629"}, {"id": "other", "label": "Other / \u0623\u062e\u0631\u0649"}]
+};
+
+
+const SEED_ASSETS = [
+  {id:'a1',date:'2024-03-01',amount:27000,note:'Opening capital / رأس المال الأولي'}
+];
+
+const SEED_DIST = [
+  {id:'d1', date:'2024-04-01', amount:10000, note:''},
+  {id:'d2', date:'2024-05-01', amount:10000, note:''},
+  {id:'d3', date:'2024-06-01', amount:10000, note:''},
+  {id:'d4', date:'2024-07-01', amount:90000, note:''},
+  {id:'d5', date:'2024-08-01', amount:5000,  note:''},
+  {id:'d6', date:'2024-09-01', amount:9000,  note:''},
+  {id:'d7', date:'2024-10-01', amount:5000,  note:''},
+  {id:'d8', date:'2024-11-01', amount:36000, note:''},
+  {id:'d9', date:'2024-12-01', amount:5000,  note:''},
+  {id:'d10',date:'2025-01-01', amount:5000,  note:''},
+  {id:'d11',date:'2025-02-01', amount:5000,  note:''},
+  {id:'d12',date:'2025-03-01', amount:5000,  note:''},
+  {id:'d13',date:'2025-04-01', amount:5000,  note:''},
+  {id:'d14',date:'2025-05-01', amount:5000,  note:''},
+  {id:'d15',date:'2025-06-01', amount:5000,  note:''},
+  {id:'d16',date:'2025-07-01', amount:5000,  note:''},
+  {id:'d17',date:'2025-08-01', amount:5000,  note:''},
+  {id:'d18',date:'2025-09-01', amount:5000,  note:''}
+];
+
+function loadData(){
+  const saved=localStorage.getItem('fp_db');
+  if(saved){const p=JSON.parse(saved);DB.income=p.income||[];DB.expenses=p.expenses||[];DB.purchases=p.purchases||SEED_P.map(x=>({...x}));DB.vatPayments=p.vatPayments||SEED_VP.map(x=>({...x}));DB.masterData=p.masterData||JSON.parse(JSON.stringify(SEED_DATA));DB.assets=p.assets&&p.assets.length?p.assets:SEED_ASSETS.map(x=>({...x}));DB.distributions=p.distributions&&p.distributions.length?p.distributions:SEED_DIST.map(x=>({...x}));}
+  else{DB.income=SEED_I.map(x=>({...x}));DB.expenses=SEED_E.map(x=>({...x}));DB.purchases=SEED_P.map(x=>({...x}));DB.vatPayments=SEED_VP.map(x=>({...x}));DB.masterData=JSON.parse(JSON.stringify(SEED_DATA));DB.assets=SEED_ASSETS.map(x=>({...x}));DB.distributions=SEED_DIST.map(x=>({...x}));}
+}
+function saveData(){localStorage.setItem('fp_db',JSON.stringify(DB));}
+
+function saveHTMLFile(){
+  // Get current HTML
+  let fileHTML = document.documentElement.outerHTML;
+
+  // Build JS for each DB collection
+  const toJS = (obj) => JSON.stringify(obj, null, 2);
+
+  // Replace SEED_I with current income data
+  fileHTML = fileHTML.replace(
+    /const SEED_I = \[[\s\S]*?\];/,
+    'const SEED_I = ' + toJS(DB.income) + ';'
+  );
+
+  // Replace SEED_E with current expenses data
+  fileHTML = fileHTML.replace(
+    /const SEED_E = \[[\s\S]*?\];/,
+    'const SEED_E = ' + toJS(DB.expenses) + ';'
+  );
+
+  // Replace SEED_P with current purchases data
+  fileHTML = fileHTML.replace(
+    /const SEED_P = \[[\s\S]*?\];/,
+    'const SEED_P = ' + toJS(DB.purchases) + ';'
+  );
+
+  // Replace SEED_VP with current VAT payments data
+  fileHTML = fileHTML.replace(
+    /const SEED_VP = \[[\s\S]*?\];/,
+    'const SEED_VP = ' + toJS(DB.vatPayments) + ';'
+  );
+
+  // Replace SEED_ASSETS with current assets data
+  fileHTML = fileHTML.replace(
+    /const SEED_ASSETS = \[[\s\S]*?\];/,
+    'const SEED_ASSETS = ' + toJS(DB.assets||[]) + ';'
+  );
+
+  // Replace SEED_DIST with current distributions data
+  fileHTML = fileHTML.replace(
+    /const SEED_DIST = \[[\s\S]*?\];/,
+    'const SEED_DIST = ' + toJS(DB.distributions||[]) + ';'
+  );
+
+  // Replace SEED_DATA with current masterData
+  if(DB.masterData){
+    fileHTML = fileHTML.replace(
+      /const SEED_DATA = \{[\s\S]*?\};/,
+      'const SEED_DATA = ' + toJS(DB.masterData) + ';'
+    );
+  }
+
+  // Clear localStorage on load so it reads from updated SEED data
+  fileHTML = fileHTML.replace(
+    'loadData();init();',
+    'localStorage.removeItem(\'fp_db\');loadData();init();'
+  );
+
+  // Download the file
+  const date = new Date().toISOString().slice(0,10);
+  const time = new Date().toTimeString().slice(0,5).replace(':','-');
+  const filename = 'financial_platform_' + date + '_' + time + '.html';
+  const blob = new Blob([fileHTML], {type: 'text/html;charset=utf-8'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(a.href);
+
+  // Show success message
+  alert('✅ File saved: ' + filename + '\n\nBiyanatك maHfuDa gowa el file nafsoh.\nبياناتك محفوظة جوا الملف نفسه.');
+}
+
+function exportData(){
+  const blob=new Blob([JSON.stringify(DB,null,2)],{type:'application/json'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);
+  a.download='financial_platform_data_'+new Date().toISOString().slice(0,10)+'.json';a.click();
+}
+function importData(input){
+  const f=input.files[0]; if(!f) return;
+  const r=new FileReader();
+  r.onload=e=>{try{const d=JSON.parse(e.target.result);DB.income=d.income||[];DB.expenses=d.expenses||[];saveData();populateSelects();init();}catch(ex){alert('Invalid JSON file / ملف JSON غير صالح');}};
+  r.readAsText(f);input.value='';
+}
+
+function getClients(){const base=DB.masterData?[...DB.masterData.clients]:[];const fromIncome=[...new Set(DB.income.map(x=>x.client))];return[...new Set([...base,...fromIncome])].sort();}
+function getProjects(){const base=DB.masterData?[...DB.masterData.projects]:[];const fromExp=[...new Set(DB.expenses.map(x=>x.project))];return[...new Set([...base,...fromExp])].sort();}
+function getExpTypes(){return DB.masterData?DB.masterData.expTypes:[{id:'equipment',label:'Equipment'},{id:'labor',label:'Labor'},{id:'admin',label:'Admin'},{id:'running',label:'Running'},{id:'materials',label:'Materials'},{id:'vat',label:'VAT'},{id:'other',label:'Other'}];}
+function getSuppliers(){const base=DB.masterData?[...DB.masterData.suppliers]:[];return[...new Set([...base,...DB.expenses.map(x=>x.project)])].sort();}
+function buildPM(){
+  const pm={};
+  DB.income.forEach(r=>{
+    if(!pm[r.client])pm[r.client]={name:r.client,income:0,vat:0,expenses:0,invoices:0,pending:0};
+    pm[r.client].income+=r.wo_vat;pm[r.client].vat+=r.vat;pm[r.client].invoices++;
+    if(r.status==='Pending')pm[r.client].pending+=r.total;
+  });
+  DB.expenses.forEach(r=>{
+    if(!pm[r.project])pm[r.project]={name:r.project,income:0,vat:0,expenses:0,invoices:0,pending:0};
+    pm[r.project].expenses+=r.amount;
+  });
+  return pm;
+}
+
+function renderOverview(){
+  const B=calcBalances();
+  const totalIn=DB.income.reduce((s,r)=>s+r.wo_vat,0);
+  const tv=DB.income.reduce((s,r)=>s+r.vat,0);
+  const te=B.totalExpenses;
+  const pend=B.pendingWithVAT;
+  const partial=B.partialRemaining;
+  document.getElementById('ov-metrics').innerHTML=`
+    <div class="metric"><div class="lbl">Total Income W/O VAT <span class="ar">إجمالي الإيرادات</span></div><div class="val blue">${SAR(totalIn)}</div></div>
+    <div class="metric"><div class="lbl">Total Expenses <span class="ar">إجمالي المصروفات</span></div><div class="val red">${SAR(te)}</div></div>
+    <div class="metric"><div class="lbl">Net Profit <span class="ar">صافي الربح</span></div><div class="val ${B.netProfit>=0?'green':'red'}">${SAR(B.netProfit)}</div></div>
+    <div class="metric"><div class="lbl">Available Balance <span class="ar">الرصيد المتاح</span></div><div class="val blue">${SAR(B.availableBalance)}</div></div>
+    <div class="metric"><div class="lbl">Account Balance <span class="ar">رصيد الحساب الفعلي</span></div><div class="val ${B.accountBalance>=0?'green':'red'}">${SAR(B.accountBalance)}</div></div>
+    <div class="metric"><div class="lbl">Pending / Partial <span class="ar">فواتير معلقة / جزئية</span></div><div class="val">${SAR(pend+partial)}</div></div>`;
+  const purVATov=DB.purchases.reduce((s,r)=>s+r.vat,0);
+  const purRefundedov=DB.purchases.filter(r=>r.status==='Refunded').reduce((s,r)=>s+r.vat,0);
+  const purRefundableov=DB.purchases.filter(r=>r.status==='Refundable').reduce((s,r)=>s+r.vat,0);
+  const vatPaidov=DB.vatPayments.reduce((s,r)=>s+r.amount,0);
+  document.getElementById('ov-vat-metrics').innerHTML=`
+    <div class="metric"><div class="lbl">VAT collected <span class="ar">ضريبة محصلة</span></div><div class="val">${SAR(tv)}</div></div>
+    <div class="metric"><div class="lbl">VAT refunded <span class="ar">ضريبة مستردة</span></div><div class="val green">${SAR(purRefundedov)}</div></div>
+    <div class="metric"><div class="lbl">Refundable remaining <span class="ar">قابل للاسترداد</span></div><div class="val blue">${SAR(purRefundableov)}</div></div>
+    <div class="metric"><div class="lbl">VAT due to govt <span class="ar">المتبقي للدفع للضريبة</span></div><div class="val red">${SAR(tv - purRefundedov - vatPaidov)}</div></div>`;
+  const ct={};DB.income.forEach(r=>{ct[r.client]=(ct[r.client]||0)+r.wo_vat});
+  const top=Object.entries(ct).sort((a,b)=>b[1]-a[1]).slice(0,8);
+  const colors=['#185FA5','#1D9E75','#D85A30','#993556','#BA7517','#534AB7','#639922','#5F5E5A'];
+  dc(clientChartRef);
+  clientChartRef=new Chart(document.getElementById('clientChart'),{
+    type:'bar',
+    data:{labels:top.map(x=>x[0]),datasets:[{data:top.map(x=>Math.round(x[1])),backgroundColor:colors,borderRadius:4}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>'SAR '+fmt2(c.parsed.y)}}},scales:{x:{ticks:{font:{size:11},autoSkip:false,maxRotation:30}},y:{ticks:{callback:v=>Math.round(v/1000)+'K'}}}}
+  });
+  const leg=document.getElementById('chart-leg');leg.innerHTML='';
+  top.forEach((x,i)=>{leg.innerHTML+=`<span style="display:flex;align-items:center;gap:3px"><span style="width:9px;height:9px;border-radius:2px;background:${colors[i]}"></span>${x[0]}</span>`});
+  document.getElementById('topbar-counts').textContent=`${DB.income.length} invoices · ${DB.expenses.length} expenses`;
+}
+
+
+let projViewMode = 'client'; // 'client' or 'project'
+
+function setProjView(mode){
+  projViewMode = mode;
+  document.getElementById('proj-view-client').className  = 'btn' + (mode==='client'  ? ' primary' : '');
+  document.getElementById('proj-view-project').className = 'btn' + (mode==='project' ? ' primary' : '');
+  // Update filter label/options
+  const sel = document.getElementById('proj-filter');
+  if(sel){
+    const cur = sel.value;
+    if(mode==='client'){
+      const clients = getClients();
+      sel.innerHTML = '<option value="">All clients / كل العملاء</option>' +
+        clients.map(c=>`<option value="${c}" ${c===cur?'selected':''}>${c}</option>`).join('');
+    } else {
+      const projects = getProjects();
+      sel.innerHTML = '<option value="">All projects / كل المشاريع</option>' +
+        projects.map(p=>`<option value="${p}" ${p===cur?'selected':''}>${p}</option>`).join('');
+    }
+  }
+  renderProjects();
+}
+
+function renderProjects(){
+  const q = (document.getElementById('proj-search')?.value||'').toLowerCase();
+  const filter = document.getElementById('proj-filter')?.value||'';
+  const mode = projViewMode || 'client';
+
+  let list;
+  if(mode==='client'){
+    // Group by client (from income)
+    const pm={};
+    DB.income.forEach(r=>{
+      const key=r.client||'Unknown';
+      if(!pm[key])pm[key]={name:key,type:'client',income:0,vat:0,expenses:0,invoices:0,pending:0};
+      pm[key].income+=r.wo_vat; pm[key].vat+=r.vat; pm[key].invoices++;
+      if(r.status==='Pending'||r.status==='Partially Paid') pm[key].pending+=r.total-(r.paidAmount||0);
+    });
+    DB.expenses.forEach(r=>{
+      const key=r.client||'';
+      if(key&&pm[key]) pm[key].expenses+=r.amount;
+    });
+    list=Object.values(pm);
+    if(filter)list=list.filter(p=>p.name===filter);
+  } else {
+    // Group by project (from income.project + expenses.project)
+    const pm={};
+    DB.income.forEach(r=>{
+      const key=r.project||'(No project)';
+      if(!pm[key])pm[key]={name:key,type:'project',income:0,vat:0,expenses:0,invoices:0,pending:0};
+      pm[key].income+=r.wo_vat; pm[key].vat+=r.vat; pm[key].invoices++;
+      if(r.status==='Pending'||r.status==='Partially Paid') pm[key].pending+=r.total-(r.paidAmount||0);
+    });
+    DB.expenses.forEach(r=>{
+      const key=r.project||'';
+      if(key){
+        if(!pm[key])pm[key]={name:key,type:'project',income:0,vat:0,expenses:0,invoices:0,pending:0};
+        pm[key].expenses+=r.amount;
+      }
+    });
+    list=Object.values(pm);
+    if(filter)list=list.filter(p=>p.name===filter);
+  }
+
+  if(q)list=list.filter(p=>p.name.toLowerCase().includes(q));
+  list.sort((a,b)=>b.income-a.income);
+
+  const el=document.getElementById('projects-list');
+  if(!list.length){el.innerHTML='<div class="empty">No results / لا توجد نتائج</div>';return}
+  el.innerHTML=list.map(p=>{
+    const net=p.income-p.expenses;const c=net>=0?'#1D9E75':'#D85A30';
+    return`<div class="proj-card" onclick="drillProject('${p.name}')">
+      <div class="proj-hdr">
+        <div><div class="proj-name">${p.name}</div><div class="proj-sub">${p.invoices} invoice${p.invoices!==1?'s':''}${p.pending>0?' · <span style="color:#BA7517">SAR '+fmt2(p.pending)+' pending / معلق</span>':' · All paid / كل مدفوع'}</div></div>
+        <span style="font-size:12px;font-weight:500;color:${c}">${net>=0?'+':''}${SAR(net)}</span>
+      </div>
+      <div class="proj-nums">
+        <div><div class="pnl">Income <span class="ar">إيرادات</span></div><div class="pnv" style="color:#185FA5">${SAR(p.income)}</div></div>
+        <div><div class="pnl">Expenses <span class="ar">مصروفات</span></div><div class="pnv" style="color:#D85A30">${SAR(p.expenses)}</div></div>
+        <div><div class="pnl">Net <span class="ar">صافي</span></div><div class="pnv" style="color:${c}">${SAR(net)}</div></div>
+      </div>
+    </div>`;
+  }).join('');
+}
+function drillProject(name){
+  document.getElementById('stmt-scope').value=name;
+  showPage('statement',document.querySelector('.nav-item[onclick*="statement"]'));
+  renderStatement();
+}
+
+function renderIncome(){
+  const q=(document.getElementById('inc-search').value||'').toLowerCase();
+  const cl=document.getElementById('inc-client').value;
+  const pf=document.getElementById('inc-project-filter')?.value||'';
+  const st=document.getElementById('inc-status').value;
+  const sh=document.getElementById('inc-sheet').value;
+  // populate project filter dynamically based on selected client
+  const pfEl=document.getElementById('inc-project-filter');
+  if(pfEl){
+    const curPf=pfEl.value;
+    const projsForClient=[...new Set(DB.income.filter(r=>!cl||r.client===cl).map(r=>r.project||'').filter(Boolean))].sort();
+    pfEl.innerHTML='<option value="">All projects / كل المشاريع</option>'+projsForClient.map(p=>`<option value="${p}" ${p===curPf?'selected':''}>${p}</option>`).join('');
+  }
+  let data=DB.income.filter(r=>{
+    if(cl&&r.client!==cl)return false;
+    if(pf&&(r.project||'')!==pf)return false;
+    // Pending filter includes Partially Paid (shows remaining uncollected)
+    if(st==='Pending'){
+      if(r.status!=='Pending'&&r.status!=='Partially Paid')return false;
+    } else if(st&&r.status!==st)return false;
+    if(sh&&r.sheet!==sh)return false;
+    if(q&&!r.client.toLowerCase().includes(q)&&!r.desc.toLowerCase().includes(q))return false;
+    return true;
+  });
+  const ti=data.reduce((s,r)=>s+r.wo_vat,0);
+  const tv=data.reduce((s,r)=>s+r.vat,0);
+  const pd=data.filter(r=>r.status==='Paid').reduce((s,r)=>s+r.wo_vat,0);
+  // Remaining uncollected = Pending total + Partially Paid remaining
+  const pendingTotal   = data.filter(r=>r.status==='Pending').reduce((s,r)=>s+r.total,0);
+  const partialRemain  = data.filter(r=>r.status==='Partially Paid').reduce((s,r)=>s+(r.total-(r.paidAmount||0)),0);
+  const totalRemaining = pendingTotal + partialRemain;
+  const isShowingPending = st==='Pending';
+  document.getElementById('inc-metrics').innerHTML=`
+    <div class="metric"><div class="lbl">W/O VAT <span class="ar">بدون ضريبة</span></div><div class="val blue">${SAR(ti)}</div></div>
+    <div class="metric"><div class="lbl">VAT <span class="ar">الضريبة</span></div><div class="val">${SAR(tv)}</div></div>
+    <div class="metric"><div class="lbl">Total incl. VAT <span class="ar">الإجمالي مع الضريبة</span></div><div class="val">${SAR(ti+tv)}</div></div>
+    ${isShowingPending
+      ? `<div class="metric"><div class="lbl">Remaining uncollected <span class="ar">المتبقي غير المحصّل</span></div><div class="val red">${SAR(totalRemaining)}</div></div>`
+      : `<div class="metric"><div class="lbl">Paid <span class="ar">مدفوع</span></div><div class="val green">${SAR(pd)}</div></div>`
+    }`;
+  document.getElementById('inc-tbody').innerHTML=data.sort((a,b)=>b.date.localeCompare(a.date)).map(r=>{
+    const cls=r.status==='Paid'?'b-paid':r.status==='Partially Paid'?'b-partial':'b-pending';
+    return`<tr><td>${r.date}</td><td title="${r.client}">${r.client}</td><td title="${r.project||''}">${r.project||'—'}</td><td>${fmt2(r.wo_vat)}</td><td>${fmt2(r.vat)}</td><td>${fmt2(r.total)}</td><td title="${r.desc}">${r.desc}</td><td>
+      <span class="badge ${cls}">${r.status==='Partially Paid'?'Partial':r.status}</span>
+      ${r.status==='Partially Paid'?`<div style="font-size:10px;color:#BA7517;margin-top:2px">Paid: ${SAR(r.paidAmount||0)}<br>Rem: ${SAR((r.total||0)-(r.paidAmount||0))}</div>`:''}
+      ${r.status==='Pending'?`<div style="font-size:10px;color:#D85A30;margin-top:2px">${SAR(r.total)}</div>`:''}
+    </td><td style="display:flex;gap:4px"><button class="btn sm" onclick="editRec('income','${r.id}')" title="Edit / تعديل" style="padding:2px 6px"><i class="ti ti-pencil" style="font-size:12px"></i></button><button class="btn sm danger" onclick="delRec('income','${r.id}')" title="Delete / حذف" style="padding:2px 6px"><i class="ti ti-trash" style="font-size:12px"></i></button></td></tr>`;
+  }).join('');
+}
+
+function renderExpenses(){
+  const q=(document.getElementById('exp-search').value||'').toLowerCase();
+  const ec=document.getElementById('exp-client-filter')?.value||'';
+  const pr=document.getElementById('exp-proj').value;
+  const tp=document.getElementById('exp-type').value;
+  const sh=document.getElementById('exp-sheet').value;
+  const sp=document.getElementById('exp-supplier').value;
+  // populate client filter from masterData clients
+  const ecEl=document.getElementById('exp-client-filter');
+  if(ecEl){const curEc=ecEl.value;const expClients=getClients();ecEl.innerHTML='<option value="">All clients / كل العملاء</option>'+expClients.map(c=>`<option value="${c}" ${c===curEc?'selected':''}>${c}</option>`).join('');}
+  // populate project filter cascading from client (use getProjects for full list when no client selected)
+  const epEl=document.getElementById('exp-proj');
+  if(epEl){
+    const curPr=epEl.value;
+    const projList = ec
+      ? [...new Set(DB.expenses.filter(r=>(r.client||'')===ec).map(r=>r.project||'').filter(Boolean))].sort()
+      : getProjects();
+    epEl.innerHTML='<option value="">All projects / كل المشاريع</option>'+projList.map(p=>`<option value="${p}" ${p===curPr?'selected':''}>${p}</option>`).join('');
+  }
+  // populate supplier dropdown dynamically
+  const spEl=document.getElementById('exp-supplier');
+  if(spEl){
+    const curSp=spEl.value;
+    const allSuppliers=[...new Set(DB.expenses.map(r=>r.supplier||'').filter(Boolean))].sort();
+    spEl.innerHTML='<option value="">All suppliers / كل الموردين</option>'+allSuppliers.map(s=>`<option value="${s}" ${s===curSp?'selected':''}>${s}</option>`).join('');
+  }
+  let data=DB.expenses.filter(r=>{
+    if(ec&&(r.client||'')!==ec)return false;
+    if(pr&&r.project!==pr)return false;
+    if(tp&&r.type!==tp)return false;
+    if(sh&&r.sheet!==sh)return false;
+    if(sp&&(r.supplier||'')!==sp)return false;
+    if(q&&!r.project.toLowerCase().includes(q)&&!(r.supplier||'').toLowerCase().includes(q)&&!r.desc.toLowerCase().includes(q))return false;
+    return true;
+  });
+  const tot=data.reduce((s,r)=>s+r.amount,0);
+  const bt={equipment:0,labor:0,admin:0,vat:0,running:0,other:0};
+  data.forEach(r=>{bt[r.type]=(bt[r.type]||0)+r.amount});
+  document.getElementById('exp-metrics').innerHTML=`
+    <div class="metric"><div class="lbl">Total <span class="ar">إجمالي المصروفات</span></div><div class="val red">${SAR(tot)}</div></div>
+    <div class="metric"><div class="lbl">Equipment <span class="ar">معدات</span></div><div class="val">${SAR(bt.equipment)}</div></div>
+    <div class="metric"><div class="lbl">Labor / Suppliers <span class="ar">عمالة وموردون</span></div><div class="val">${SAR(bt.labor)}</div></div>
+    <div class="metric"><div class="lbl">Admin / Overhead <span class="ar">مصروفات إدارية</span></div><div class="val">${SAR(bt.admin)}</div></div>`;
+  document.getElementById('exp-tbody').innerHTML=data.sort((a,b)=>b.date.localeCompare(a.date)).map(r=>{
+    return`<tr>
+      <td>${r.date}</td>
+      <td title="${r.client||''}">${r.client||'—'}</td>
+      <td title="${r.project}">${r.project||'-'}</td>
+      <td title="${r.supplier||''}">${r.supplier||'—'}</td>
+      <td>${fmt2(r.amount)}</td>
+      <td title="${r.desc}">${r.desc}</td>
+      <td><span class="badge ${typeCls[r.type]||'b-other'}">${(DB.masterData?.expTypes.find(t=>t.id===r.type)?.label)||typeLabel[r.type]||r.type}</span></td>
+      <td style="display:flex;gap:4px">
+        <button class="btn sm" onclick="editRec('expenses','${r.id}')" title="Edit / تعديل" style="padding:2px 6px"><i class="ti ti-pencil" style="font-size:12px"></i></button>
+        <button class="btn sm danger" onclick="delRec('expenses','${r.id}')" title="Delete / حذف" style="padding:2px 6px"><i class="ti ti-trash" style="font-size:12px"></i></button>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function renderMonthly(){
+  const yr=document.getElementById('mon-year').value;
+  const tp=document.getElementById('mon-type').value;
+  const ms={};
+  DB.income.forEach(r=>{
+    const m=r.date.slice(0,7);if(yr&&!m.startsWith(yr))return;
+    if(!ms[m])ms[m]={m,income:0,vat:0,expenses:0};
+    ms[m].income+=r.wo_vat;ms[m].vat+=r.vat;
+  });
+  DB.expenses.forEach(r=>{
+    const m=r.date.slice(0,7);if(yr&&!m.startsWith(yr))return;
+    if(!ms[m])ms[m]={m,income:0,vat:0,expenses:0};
+    ms[m].expenses+=r.amount;
+  });
+  const list=Object.values(ms).sort((a,b)=>a.m.localeCompare(b.m));
+  const ti=list.reduce((s,r)=>s+r.income,0);
+  const te=list.reduce((s,r)=>s+r.expenses,0);
+  const tv=list.reduce((s,r)=>s+r.vat,0);
+  // For period net profit use full calcBalances if all years selected, else ti+tv-te
+  const isAllPeriod = !yr;
+  const periodNet = isAllPeriod ? calcBalances().netProfit : (ti + tv) - te;
+  document.getElementById('mon-totals').innerHTML=`
+    <div class="metric"><div class="lbl">Period income W/O VAT <span class="ar">إيرادات الفترة</span></div><div class="val blue">${SAR(ti)}</div></div>
+    <div class="metric"><div class="lbl">Period expenses <span class="ar">مصروفات الفترة</span></div><div class="val red">${SAR(te)}</div></div>
+    <div class="metric"><div class="lbl">Net profit <span class="ar">صافي الربح</span></div><div class="val ${periodNet>=0?'green':'red'}">${SAR(periodNet)}</div></div>
+    <div class="metric"><div class="lbl">Months <span class="ar">عدد الأشهر</span></div><div class="val">${list.length}</div></div>`;
+  dc(monChartRef);
+  const datasets=[];
+  if(tp!=='expenses')datasets.push({label:'Income / إيرادات',data:list.map(x=>Math.round(x.income)),backgroundColor:'#B5D4F4',borderColor:'#185FA5',borderWidth:1,type:'bar'});
+  if(tp!=='income')datasets.push({label:'Expenses / مصروفات',data:list.map(x=>Math.round(x.expenses)),backgroundColor:'#FACCC0',borderColor:'#D85A30',borderWidth:1,type:'bar'});
+  if(tp==='')datasets.push({label:'Net / صافي',data:list.map(x=>Math.round(x.income-x.expenses)),borderColor:'#1D9E75',borderWidth:2,type:'line',fill:false,pointRadius:3,tension:0.3});
+  monChartRef=new Chart(document.getElementById('monChart'),{
+    type:'bar',data:{labels:list.map(x=>x.m),datasets},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{font:{size:10},maxRotation:45}},y:{ticks:{callback:v=>(v<0?'-':'')+Math.abs(Math.round(v/1000))+'K'}}}}
+  });
+  const ll=document.getElementById('mon-legend');ll.innerHTML='';
+  [['#185FA5','Income / إيرادات'],['#D85A30','Expenses / مصروفات'],['#1D9E75','Net / صافي']].forEach(([c,l])=>{
+    ll.innerHTML+=`<span style="display:flex;align-items:center;gap:4px"><span style="width:9px;height:9px;border-radius:2px;background:${c}"></span>${l}</span>`});
+  document.getElementById('mon-tbody').innerHTML=list.map(r=>{
+    const n=r.income-r.expenses;
+    return`<tr><td>${r.m}</td><td>${fmt2(r.income)}</td><td>${fmt2(r.vat)}</td><td>${fmt2(r.expenses)}</td><td style="color:${n>=0?'#1D9E75':'#D85A30'}">${fmt2(n)}</td></tr>`;
+  }).join('');
+}
+
+function renderVAT(){
+  const B=calcBalances();
+  const tv=B.vatCollected;
+  const purVAT=DB.purchases.reduce((s,r)=>s+r.vat,0);
+  const purRefunded=DB.purchases.filter(r=>r.status==='Refunded').reduce((s,r)=>s+r.vat,0);
+  const purRefundable=DB.purchases.filter(r=>r.status==='Refundable').reduce((s,r)=>s+r.vat,0);
+  const purPending=DB.purchases.filter(r=>r.status==='Pending').reduce((s,r)=>s+r.vat,0);
+  const rf=purRefunded;
+  const pd=B.vatPaid;
+  const rm=B.vatRemaining;
+  document.getElementById('vat-summary').innerHTML=`
+    <div style="font-size:11px;font-weight:500;color:#888;margin-bottom:10px;text-transform:uppercase;letter-spacing:.3px">VAT breakdown / تفاصيل ضريبة القيمة المضافة</div>
+    <div class="stmnt-row"><span class="stmnt-lbl">VAT collected on sales <span class="ar">ضريبة محصلة على المبيعات</span></span><span style="color:#185FA5">${SAR(tv)}</span></div>
+    <div class="stmnt-row"><span class="stmnt-lbl" style="color:#888;padding-right:10px">— Total VAT on purchases <span class="ar">إجمالي ضريبة المشتريات</span></span><span>${SAR(purVAT)}</span></div>
+    <div class="stmnt-row"><span class="stmnt-lbl" style="color:#888;padding-right:10px">— Refunded <span class="ar">تم استرداده</span></span><span style="color:#1D9E75">${SAR(rf)}</span></div>
+    <div class="stmnt-row"><span class="stmnt-lbl" style="color:#888;padding-right:10px">— Refundable (pending) <span class="ar">قابل للاسترداد</span></span><span style="color:#BA7517">${SAR(purRefundable)}</span></div>
+    <div class="stmnt-row"><span class="stmnt-lbl" style="color:#888;padding-right:10px">— Pending invoices <span class="ar">فواتير معلقة</span></span><span>${SAR(purPending)}</span></div>
+    <div class="stmnt-row"><span class="stmnt-lbl">VAT paid to government <span class="ar">ضريبة مدفوعة للحكومة</span></span><span style="color:#D85A30">${SAR(DB.vatPayments.reduce((s,r)=>s+r.amount,0))}</span></div>
+    <div class="stmnt-row total"><span class="stmnt-lbl">Remaining due to govt <span class="ar">المتبقي للدفع للضريبة</span></span><span style="color:${(tv-rf-DB.vatPayments.reduce((s,r)=>s+r.amount,0))>=0?'#D85A30':'#1D9E75'}">${SAR(tv-rf-DB.vatPayments.reduce((s,r)=>s+r.amount,0))}</span></div>`;
+  document.getElementById('vat-metrics').innerHTML=`
+    <div class="metric"><div class="lbl">Collected on sales <span class="ar">محصلة على المبيعات</span></div><div class="val blue">${SAR(tv)}</div></div>
+    <div class="metric"><div class="lbl">VAT on purchases <span class="ar">ضريبة المشتريات</span></div><div class="val">${SAR(purVAT)}</div></div>
+    <div class="metric"><div class="lbl">Refunded <span class="ar">مستردة</span></div><div class="val green">${SAR(rf)}</div></div>
+    <div class="metric"><div class="lbl">Refundable remaining <span class="ar">قابل للاسترداد</span></div><div class="val red">${SAR(purRefundable)}</div></div>`;
+  dc(vatChartRef);
+  vatChartRef=new Chart(document.getElementById('vatChart'),{
+    type:'doughnut',
+    data:{labels:['Refunded / مستردة','Refundable / قابل','Pending / معلق'],datasets:[{data:[Math.round(rf),Math.round(purRefundable),Math.round(purPending)],backgroundColor:['#1D9E75','#185FA5','#BA7517'],borderWidth:0}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>'SAR '+fmt2(c.parsed)}}}}
+  });
+  const vl=document.getElementById('vat-leg');vl.innerHTML='';
+  [['#1D9E75','Refunded / مستردة',rf],['#185FA5','Refundable / قابل للاسترداد',purRefundable],['#BA7517','Pending / معلق',purPending]].forEach(([c,l,v])=>{
+    vl.innerHTML+=`<span style="display:flex;align-items:center;gap:4px"><span style="width:9px;height:9px;border-radius:2px;background:${c}"></span>${l}: ${SAR(v)}</span>`});
+  
+// VAT payments metrics + table
+  const totalVPaid=DB.vatPayments.reduce((s,r)=>s+r.amount,0);
+  const vatDue=tv-rf-totalVPaid;
+  document.getElementById('vp-metrics').innerHTML=`
+    <div class="metric"><div class="lbl">Total paid to ZATCA <span class="ar">إجمالي المدفوع للحكومة</span></div><div class="val red">${SAR(totalVPaid)}</div></div>
+    <div class="metric"><div class="lbl">VAT collected <span class="ar">ضريبة محصلة</span></div><div class="val blue">${SAR(tv)}</div></div>
+    <div class="metric"><div class="lbl">VAT refunded <span class="ar">ضريبة مستردة</span></div><div class="val green">${SAR(rf)}</div></div>
+    <div class="metric"><div class="lbl">المتبقي للدفع للضريبة <span class="ar">Remaining due</span></div><div class="val ${vatDue>0?'red':'green'}">${SAR(vatDue)}</div></div>`;
+  document.getElementById('vat-tbody').innerHTML=DB.vatPayments.length?DB.vatPayments.sort((a,b)=>b.date.localeCompare(a.date)).map(r=>`
+    <tr>
+      <td>${r.date}</td>
+      <td><span class="badge b-admin">${r.period||'-'}</span></td>
+      <td title="${r.desc}">${r.desc}</td>
+      <td style="font-weight:500;color:#D85A30">${r.amount.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</td>
+      <td style="display:flex;gap:4px"><button class="btn sm" onclick="editVP('${r.id}')" title="Edit / تعديل" style="padding:2px 6px"><i class="ti ti-pencil" style="font-size:12px"></i></button><button class="btn sm danger" onclick="delVP('${r.id}')" title="Delete" style="padding:2px 6px"><i class="ti ti-trash" style="font-size:12px"></i></button></td>
+    </tr>`).join(''):'<tr><td colspan="5" style="text-align:center;color:#aaa;padding:1rem">No payments yet / لا توجد مدفوعات</td></tr>';
+}
+
+
+function switchStmtTab(tab){
+  // Toggle toolbar visibility
+  document.getElementById('stmt-toolbar-company').style.display = tab==='company' ? 'block' : 'none';
+  document.getElementById('stmt-toolbar-client').style.display  = tab==='client'  ? 'block' : 'none';
+  // Toggle button styles
+  document.getElementById('stmt-tab-company').className = 'btn' + (tab==='company' ? ' primary' : '');
+  document.getElementById('stmt-tab-client').className  = 'btn' + (tab==='client'  ? ' primary' : '');
+  // Render appropriate report
+  document.getElementById('stmt-content').innerHTML = '';
+  if(tab==='company'){
+    setCoType(coFilterType||'all');
+  } else {
+    setStmtClientType(stmtClientType||'client');
+  }
+}
+
+
+
+
+let coFilterType = 'all'; // 'all' | 'client' | 'project' | 'supplier'
+
+function setCoType(type){
+  coFilterType = type;
+  ['all','client','project','supplier'].forEach(t=>{
+    const b=document.getElementById('co-type-'+t);
+    if(b) b.className='btn sm'+(t===type?' primary':'');
+  });
+  const sel=document.getElementById('stmt-co-entity');
+  if(!sel) return;
+  if(type==='all'){
+    sel.style.display='none';
+  } else {
+    sel.style.display='';
+    const cur=sel.value;
+    // For project: merge clients + masterData projects (client names = project names in existing data)
+    let opts;
+    if(type==='client')   opts = getClients();
+    else if(type==='project')  opts = [...new Set([...getClients(),...getProjects()])].sort();
+    else opts = getSuppliers();
+    const allLabel = type==='client'?'All clients / كل العملاء':type==='project'?'All projects / كل المشاريع':'All suppliers / كل الموردين';
+    sel.innerHTML='<option value="">'+allLabel+'</option>'+
+      opts.map(o=>`<option value="${o}" ${o===cur?'selected':''}>${o}</option>`).join('');
+  }
+  renderStatement();
+}
+
+let stmtClientType = 'client'; // 'client' | 'project' | 'supplier'
+
+function setStmtClientType(type){
+  stmtClientType = type;
+  ['client','project','supplier'].forEach(t=>{
+    const btn = document.getElementById('stmt-cl-type-'+t);
+    if(btn) btn.className = 'btn sm' + (t===type?' primary':'');
+  });
+  // Repopulate the select dropdown based on type
+  const sel = document.getElementById('stmt-client');
+  if(!sel) return;
+  const cur = sel.value;
+  let options = [];
+  if(type==='client')   options = getClients();
+  else if(type==='project')  options = getProjects();
+  else if(type==='supplier') options = getSuppliers();
+  sel.innerHTML = '<option value="">-- Select / اختر --</option>' +
+    options.map(o=>`<option value="${o}" ${o===cur?'selected':''}>${o}</option>`).join('');
+  document.getElementById('stmt-content').innerHTML =
+    '<div style="padding:2rem;text-align:center;color:#aaa"><i class="ti ti-file-text" style="font-size:32px;display:block;margin-bottom:8px"></i>Select an item to view its statement<br><span style="font-size:11px">اختر عنصراً لعرض كشف حسابه</span></div>';
+  if(cur) renderClientStatement();
+}
+
+function renderClientStatement(){
+  const val  = document.getElementById('stmt-client').value;
+  const yr   = document.getElementById('stmt-client-year').value;
+  const type = stmtClientType || 'client';
+
+  if(!val){
+    document.getElementById('stmt-content').innerHTML =
+      '<div style="padding:2rem;text-align:center;color:#aaa"><i class="ti ti-file-text" style="font-size:32px;display:block;margin-bottom:8px"></i>Select an item to view their statement<br><span style="font-size:11px">اختر عنصراً لعرض كشف حسابه</span></div>';
+    return;
+  }
+
+  const yrF = r => !yr || r.date.startsWith(yr);
+
+  // Client statement = invoices ONLY (no expenses shown to client)
+  let invoices = [];
+  if(type==='client')  invoices = DB.income.filter(r=>r.client===val && yrF(r));
+  else if(type==='project') invoices = DB.income.filter(r=>r.project===val && yrF(r));
+  else if(type==='supplier') {
+    // Suppliers: show their payment records (expenses)
+    const expRows = DB.expenses.filter(r=>r.supplier===val && yrF(r)).sort((a,b)=>a.date.localeCompare(b.date));
+    const total = expRows.reduce((s,r)=>s+r.amount,0);
+    document.getElementById('stmt-content').innerHTML=`
+      <div style="background:#fafaf8;border:0.5px solid #eee;border-radius:10px;padding:16px;margin-bottom:14px">
+        <div style="font-size:13px;font-weight:500;margin-bottom:10px"><i class="ti ti-users" style="color:#185FA5"></i> Supplier: ${val}</div>
+        <div class="stmnt-row total"><span class="stmnt-lbl">Total payments <span class="ar">إجمالي المدفوعات</span></span><span style="color:#D85A30">${SAR(total)}</span></div>
+      </div>
+      <div class="tbl-wrap"><table>
+        <thead><tr><th>Date</th><th>Project</th><th>Description</th><th>Amount</th></tr></thead>
+        <tbody>
+          ${expRows.map(r=>`<tr><td>${r.date}</td><td>${r.project||'-'}</td><td>${r.desc}</td><td>${fmt2(r.amount)}</td></tr>`).join('')||'<tr><td colspan="4" class="empty">No records</td></tr>'}
+          <tr style="background:#fafaf8;font-weight:500;border-top:1px solid #ddd">
+            <td colspan="3" style="color:#888;font-size:11px">Total</td>
+            <td style="color:#D85A30">${fmt2(total)}</td>
+          </tr>
+        </tbody>
+      </table></div>`;
+    return;
+  }
+
+  invoices = invoices.sort((a,b)=>a.date.localeCompare(b.date));
+
+  const totalInvoiced  = invoices.reduce((s,r)=>s+r.total,0);
+  const totalWoVAT     = invoices.reduce((s,r)=>s+r.wo_vat,0);
+  const totalVAT       = invoices.reduce((s,r)=>s+r.vat,0);
+  const totalPaid      = invoices.filter(r=>r.status==='Paid').reduce((s,r)=>s+r.total,0)
+                       + invoices.filter(r=>r.status==='Partially Paid').reduce((s,r)=>s+(r.paidAmount||0),0);
+  const totalPending   = invoices.filter(r=>r.status==='Pending').reduce((s,r)=>s+r.total,0);
+  const totalPartial   = invoices.filter(r=>r.status==='Partially Paid').reduce((s,r)=>s+(r.total-(r.paidAmount||0)),0);
+  const totalRemaining = totalPending + totalPartial;
+
+  const typeIcon  = type==='client'?'ti-building-store':'ti-building';
+  const typeLabel = type==='client'?'Client / عميل':'Project / مشروع';
+
+  const stBadge = r => {
+    if(r.status==='Paid') return '<span class="badge b-paid">Paid</span>';
+    if(r.status==='Partially Paid') return `<span class="badge b-partial">Partial</span><div style="font-size:10px;color:#BA7517">Paid: ${SAR(r.paidAmount||0)}<br>Rem: ${SAR(r.total-(r.paidAmount||0))}</div>`;
+    return `<span class="badge b-pending">Pending</span><div style="font-size:10px;color:#D85A30">${SAR(r.total)}</div>`;
+  };
+
+  document.getElementById('stmt-content').innerHTML=`
+    <div style="background:#fafaf8;border:0.5px solid #eee;border-radius:10px;padding:16px;margin-bottom:14px">
+      <div style="font-size:13px;font-weight:500;margin-bottom:12px">
+        <i class="ti ${typeIcon}" style="color:#185FA5"></i> ${typeLabel}: <strong>${val}</strong>
+        ${yr?`<span style="font-size:11px;color:#aaa">· ${yr}</span>`:''}
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;margin-bottom:12px">
+        <div class="metric"><div class="lbl">Total invoiced <span class="ar">إجمالي الفواتير</span></div><div class="val blue">${SAR(totalInvoiced)}</div></div>
+        <div class="metric"><div class="lbl">Paid <span class="ar">مدفوع</span></div><div class="val green">${SAR(totalPaid)}</div></div>
+        <div class="metric"><div class="lbl">Remaining <span class="ar">متبقي</span></div><div class="val ${totalRemaining>0?'red':'green'}">${SAR(totalRemaining)}</div></div>
+        <div class="metric"><div class="lbl">Invoices <span class="ar">عدد الفواتير</span></div><div class="val">${invoices.length}</div></div>
+      </div>
+      <div class="stmnt-row"><span class="stmnt-lbl">Total W/O VAT <span class="ar">بدون ضريبة</span></span><span>${SAR(totalWoVAT)}</span></div>
+      <div class="stmnt-row"><span class="stmnt-lbl">VAT <span class="ar">الضريبة</span></span><span>${SAR(totalVAT)}</span></div>
+      <div class="stmnt-row"><span class="stmnt-lbl">Total incl. VAT <span class="ar">مع الضريبة</span></span><span style="color:#185FA5">${SAR(totalInvoiced)}</span></div>
+      <div class="stmnt-row"><span class="stmnt-lbl">Paid <span class="ar">محصّل</span></span><span style="color:#1D9E75">(${SAR(totalPaid)})</span></div>
+      <div class="stmnt-row total"><span class="stmnt-lbl">Balance remaining <span class="ar">الرصيد المتبقي</span></span>
+        <span style="color:${totalRemaining>0?'#D85A30':'#1D9E75'};font-size:16px">${SAR(totalRemaining)}</span>
+      </div>
+    </div>
+    <div class="tbl-wrap"><table>
+      <thead><tr>
+        <th style="width:90px">Date</th>
+        <th>Description <span class="ar">الوصف</span></th>
+        <th style="width:90px">W/O VAT</th>
+        <th style="width:80px">VAT</th>
+        <th style="width:95px">Total</th>
+        <th style="width:110px">Status <span class="ar">الحالة</span></th>
+      </tr></thead>
+      <tbody>
+        ${invoices.map(r=>`<tr>
+          <td>${r.date}</td>
+          <td title="${r.desc}">${r.desc}</td>
+          <td>${fmt2(r.wo_vat)}</td>
+          <td>${fmt2(r.vat)}</td>
+          <td style="font-weight:500">${fmt2(r.total)}</td>
+          <td>${stBadge(r)}</td>
+        </tr>`).join('')||'<tr><td colspan="6" class="empty">No invoices</td></tr>'}
+        <tr style="background:#fafaf8;font-weight:500;border-top:1px solid #ddd">
+          <td colspan="2" style="color:#888;font-size:11px">Total / الإجمالي</td>
+          <td>${fmt2(totalWoVAT)}</td>
+          <td>${fmt2(totalVAT)}</td>
+          <td style="color:#185FA5">${fmt2(totalInvoiced)}</td>
+          <td style="color:${totalRemaining>0?'#D85A30':'#1D9E75'}">${fmt2(totalRemaining)} rem.</td>
+        </tr>
+      </tbody>
+    </table></div>`;
+}
+
+
+function renderStatement(){
+  const yr  = document.getElementById('stmt-year').value;
+  const type= coFilterType || 'all';
+  const entity = document.getElementById('stmt-co-entity')?.value || '';
+  const yrF = r => !yr || r.date.startsWith(yr);
+  let fi, fe;
+  if(type==='all'){
+    fi = DB.income.filter(yrF);
+    fe = DB.expenses.filter(yrF);
+  } else if(type==='client'){
+    // Client: filter income by r.client, expenses by r.client
+    fi = DB.income.filter(r => yrF(r) && (!entity || r.client===entity));
+    fe = DB.expenses.filter(r => yrF(r) && (!entity || r.client===entity));
+  } else if(type==='project'){
+    // Project: filter income by r.client OR r.project, expenses by r.project
+    fi = DB.income.filter(r => yrF(r) && (!entity || r.client===entity || r.project===entity));
+    fe = DB.expenses.filter(r => yrF(r) && (!entity || r.project===entity));
+  } else if(type==='supplier'){
+    // Supplier: no income, filter expenses by r.supplier
+    fi = [];
+    fe = DB.expenses.filter(r => yrF(r) && (!entity || r.supplier===entity));
+  }
+  const ti=fi.reduce((s,r)=>s+r.wo_vat,0);
+  const tv=fi.reduce((s,r)=>s+r.vat,0);
+  const te=fe.reduce((s,r)=>s+r.amount,0);
+  const paid=fi.filter(r=>r.status==='Paid').reduce((s,r)=>s+r.wo_vat,0);
+  const pend=fi.filter(r=>r.status==='Pending').reduce((s,r)=>s+r.total,0);
+  const netP = ti - te;
+  const B = isAll&&!yr ? calcBalances() : null;
+  document.getElementById('stmt-content').innerHTML=`
+    <div style="background:#fafaf8;border:0.5px solid #eee;border-radius:10px;padding:16px;margin-bottom:14px" id="stmt-print">
+      <div style="font-size:11px;font-weight:500;color:#888;margin-bottom:10px;text-transform:uppercase;letter-spacing:.3px">
+        ${proj?proj:'Company (all) / الشركة كاملة'} ${yr?'· '+yr:'· All periods / كل الفترات'}
+      </div>
+      <div class="stmnt-row"><span class="stmnt-lbl">Income W/O VAT <span class="ar">إيرادات بدون ضريبة</span></span><span style="color:#185FA5">${SAR(ti)}</span></div>
+      <div class="stmnt-row"><span class="stmnt-lbl">VAT collected <span class="ar">ضريبة محصلة</span></span><span>${SAR(tv)}</span></div>
+      <div class="stmnt-row"><span class="stmnt-lbl" style="padding-right:12px;color:#aaa">— Paid invoices / مدفوعة</span><span style="color:#1D9E75">${SAR(paid)}</span></div>
+      <div class="stmnt-row"><span class="stmnt-lbl" style="padding-right:12px;color:#aaa">— Pending invoices / معلقة</span><span style="color:#BA7517">${SAR(pend)}</span></div>
+      <div class="stmnt-row"><span class="stmnt-lbl">Total expenses <span class="ar">إجمالي المصروفات</span></span><span style="color:#D85A30">${SAR(te)}</span></div>
+      <div class="stmnt-row total"><span class="stmnt-lbl">Net profit <span class="ar">صافي الربح</span></span><span style="color:${netP>=0?'#1D9E75':'#D85A30'}">${SAR(netP)}</span></div>
+      ${proj?`<div style="background:#EBF2FB;border-radius:6px;padding:8px 10px;margin-top:8px;font-size:11px;color:#185FA5">
+        <i class="ti ti-info-circle"></i> Project filter active: <strong>${proj}</strong> — showing income & expenses for this project only / فلتر المشروع نشط
+      </div>`:''}
+      ${B&&!proj?`<div style="border-top:0.5px solid #ddd;margin-top:10px;padding-top:10px">
+        <div class="stmnt-row"><span class="stmnt-lbl">Assets <span class="ar">رأس المال</span></span><span>${SAR(B.totalAssets)}</span></div>
+        <div class="stmnt-row"><span class="stmnt-lbl">Distributions <span class="ar">توزيعات الأرباح</span></span><span style="color:#D85A30">(${SAR(B.totalDist)})</span></div>
+        <div class="stmnt-row"><span class="stmnt-lbl">Available Balance <span class="ar">الرصيد المتاح</span></span><span style="color:#185FA5">${SAR(B.availableBalance)}</span></div>
+        <div class="stmnt-row total"><span class="stmnt-lbl">Account Balance <span class="ar">رصيد الحساب الفعلي</span></span><span style="color:#1D9E75">${SAR(B.accountBalance)}</span></div>
+      </div>`:''}
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+      <div>
+        <div class="section-sep"><i class="ti ti-arrow-up-right"></i> Income <span class="ar">الإيرادات</span></div>
+        <div class="tbl-wrap"><table><thead><tr><th>Date</th><th>Client</th><th>Description</th><th>Amount</th><th>Status</th></tr></thead><tbody>${fi.sort((a,b)=>b.date.localeCompare(a.date)).map(r=>`<tr><td>${r.date}</td><td>${r.client}</td><td title="${r.desc}">${r.desc}</td><td>${fmt2(r.wo_vat)}</td><td><span class="badge ${r.status==='Paid'?'b-paid':r.status==='Partially Paid'?'b-partial':'b-pending'}">${r.status}</span></td></tr>`).join('')||'<tr><td colspan="5" class="empty">No records</td></tr>'}</tbody></table></div>
+      </div>
+      <div>
+        <div class="section-sep"><i class="ti ti-arrow-down-left"></i> Expenses <span class="ar">المصروفات</span></div>
+        <div class="tbl-wrap"><table><thead><tr><th>Date</th><th>Project</th><th>Supplier</th><th>Amount</th></tr></thead><tbody>${fe.sort((a,b)=>b.date.localeCompare(a.date)).map(r=>`<tr><td>${r.date}</td><td>${r.project||'-'}</td><td>${r.supplier||'-'}</td><td>${fmt2(r.amount)}</td></tr>`).join('')||'<tr><td colspan="4" class="empty">No records</td></tr>'}</tbody></table></div>
+      </div>
+    </div>`;
+}
+
+
+
+function printStatement(){window.print()}
+
+function renderPurchases(){
+  const q=(document.getElementById('pur-search').value||'').toLowerCase();
+  const tp=document.getElementById('pur-type').value;
+  const st=document.getElementById('pur-status').value;
+  let data=DB.purchases.filter(r=>{
+    if(tp&&r.type!==tp)return false;
+    if(st&&r.status!==st)return false;
+    if(q&&!r.supplier.toLowerCase().includes(q)&&!r.desc.toLowerCase().includes(q))return false;
+    return true;
+  });
+  const totalVAT=data.reduce((s,r)=>s+r.vat,0);
+  const refunded=data.filter(r=>r.status==='Refunded').reduce((s,r)=>s+r.vat,0);
+  const allVAT=DB.purchases.reduce((s,r)=>s+r.vat,0);
+  const allRefunded=DB.purchases.filter(r=>r.status==='Refunded').reduce((s,r)=>s+r.vat,0);
+  document.getElementById('pur-metrics').innerHTML=`
+    <div class="metric"><div class="lbl">Total purchases W/O VAT <span class="ar">إجمالي المشتريات بدون ضريبة</span></div><div class="val">${SAR(data.reduce((s,r)=>s+r.wo_vat,0))}</div></div>
+    <div class="metric"><div class="lbl">Total VAT on purchases <span class="ar">إجمالي الضريبة</span></div><div class="val blue">${SAR(totalVAT)}</div></div>
+    <div class="metric"><div class="lbl">Refundable VAT <span class="ar">ضريبة قابلة للاسترداد</span></div><div class="val green">${SAR(data.filter(r=>r.status==='Refundable').reduce((s,r)=>s+r.vat,0))}</div></div>
+    <div class="metric"><div class="lbl">Count <span class="ar">عدد الفواتير</span></div><div class="val">${data.length}</div></div>`;
+  document.getElementById('pur-tbody').innerHTML=data.sort((a,b)=>b.date.localeCompare(a.date)).map(r=>{
+    const stcls=r.status==='Refunded'?'b-paid':r.status==='Refundable'?'b-equipment':'b-pending';
+    const typeLbl=r.type==='supplier'?'Supplier / مورد':'General / عام';
+    const typeC=r.type==='supplier'?'b-equipment':'b-labor';
+    return`<tr>
+      <td>${r.date}</td>
+      <td><span class="badge ${typeC}">${typeLbl}</span></td>
+      <td title="${r.supplier}">${r.supplier}</td>
+      <td>${fmt2(r.wo_vat)}</td>
+      <td style="color:#185FA5;font-weight:500">${r.vat.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</td>
+      <td>${fmt2(r.total)}</td>
+      <td title="${r.desc}">${r.desc}</td>
+      <td>
+        <select onchange="changePurStatus('${r.id}',this.value)" style="font-size:11px;padding:2px 6px;border:0.5px solid #ddd;border-radius:5px;background:#fff;cursor:pointer">
+          <option value="Refundable" ${r.status==='Refundable'?'selected':''}>Refundable / قابل</option>
+          <option value="Pending" ${r.status==='Pending'?'selected':''}>Pending / معلق</option>
+          <option value="Refunded" ${r.status==='Refunded'?'selected':''}>Refunded / تم</option>
+        </select>
+      </td>
+      <td style="display:flex;gap:4px"><button class="btn sm" onclick="editPur('${r.id}')" title="Edit / تعديل" style="padding:2px 6px"><i class="ti ti-pencil" style="font-size:12px"></i></button><button class="btn sm danger" onclick="delPur('${r.id}')" title="Delete" style="padding:2px 6px"><i class="ti ti-trash" style="font-size:12px"></i></button></td>
+    </tr>`;
+  }).join('');
+  document.getElementById('pur-vat-total').textContent=SAR(allVAT);
+  document.getElementById('pur-vat-refunded').textContent=SAR(allRefunded);
+  document.getElementById('pur-vat-remaining').textContent=SAR(allVAT-allRefunded);
+}
+
+function changePurStatus(id,val){
+  const r=DB.purchases.find(x=>x.id===id);
+  if(r){r.status=val;saveData();renderPurchases();}
+}
+
+function delPur(id){
+  if(!confirm('Delete this purchase?\nحذف هذه الفاتورة؟'))return;
+  DB.purchases=DB.purchases.filter(r=>r.id!==id);
+  saveData();renderPurchases();
+}
+
+function delVP(id){
+  if(!confirm('Delete this VAT payment?\nحذف هذه الدفعة؟'))return;
+  DB.vatPayments=DB.vatPayments.filter(r=>r.id!==id);
+  saveData();renderVAT();renderOverview();
+}
+
+
+// ─── EDIT FUNCTIONS ────────────────────────────────────────────────────────
+
+function editRec(type, id){
+  const r = type==='income'
+    ? DB.income.find(x=>x.id===id)
+    : DB.expenses.find(x=>x.id===id);
+  if(!r) return;
+  const fo=document.getElementById('form-overlay');
+  const fb=document.getElementById('form-box');
+  fo.classList.add('open');
+
+  if(type==='income'){
+    fb.innerHTML=`<h3><i class="ti ti-edit"></i> Edit invoice <span class="ar">تعديل الفاتورة</span></h3>
+      <div class="form-grid">
+        <div class="fg"><label>Date <span class="ar">التاريخ</span></label><input type="date" id="f-date" value="${r.date}"/></div>
+        <div class="fg"><label>Client <span class="ar">العميل</span></label>${makeComboSelect('f-client',getClients(),r.client,'Select client / اختر عميل')}</div>
+        <div class="fg"><label>Project <span class="ar">المشروع</span></label>${makeComboSelect('f-project-inc',getProjects(),r.project||'','Select project / اختر مشروع')}</div>
+        <div class="fg"><label>Amount W/O VAT <span class="ar">بدون ضريبة</span></label><input type="number" id="f-wo" value="${r.wo_vat}" step="0.01" oninput="calcEditVAT()"/></div>
+        <div class="fg"><label>VAT type <span class="ar">نوع الضريبة</span></label>
+          <select id="f-vat-type-e" onchange="calcEditVAT()" style="margin-bottom:4px">
+            <option value="15" ${r.vat>0?'selected':''}>VAT 15% / خاضع للضريبة</option>
+            <option value="0" ${r.vat===0?'selected':''}>0% / بدون ضريبة</option>
+          </select>
+          <input type="number" id="f-vat" value="${r.vat}" step="0.01" style="background:#f5f5f3" readonly/>
+        </div>
+        <div class="fg full"><label>Description <span class="ar">الوصف</span></label><input type="text" id="f-desc" value="${r.desc.replace(/'/g,"&apos;")}"/></div>
+        <div class="fg"><label>Status <span class="ar">الحالة</span></label>
+          <select id="f-status" onchange="togglePartial(this.value,'edit-partial-wrap')">
+            <option value="Paid" ${r.status==='Paid'?'selected':''}>Paid / مدفوع بالكامل</option>
+            <option value="Pending" ${r.status==='Pending'?'selected':''}>Pending / معلق</option>
+            <option value="Partially Paid" ${r.status==='Partially Paid'?'selected':''}>Partially Paid / مدفوع جزئياً</option>
+          </select>
+        </div>
+        <div class="fg"><label>Sheet <span class="ar">الشيت</span></label><select id="f-sheet"><option value="backfilling" ${r.sheet==='backfilling'?'selected':''}>Backfilling / ردم</option><option value="equipment" ${r.sheet==='equipment'?'selected':''}>Equipment / معدات</option></select></div>
+        <div class="fg full" id="edit-partial-wrap" style="display:${r.status==='Partially Paid'?'flex':'none'};flex-direction:column;gap:3px">
+          <label>Amount paid so far <span class="ar">المبلغ المدفوع حتى الآن</span></label>
+          <input type="number" id="f-paid-partial" value="${r.paidAmount||0}" step="0.01" placeholder="0"/>
+          <span style="font-size:10px;color:#aaa" id="edit-partial-remaining">Remaining: ${SAR((r.total||0)-(r.paidAmount||0))}</span>
+        </div>
+      </div>
+      <div class="form-actions"><button class="btn" onclick="closeForm()">Cancel / إلغاء</button><button class="btn primary" onclick="updateRec('income','${r.id}')">Save changes / حفظ التعديل</button></div>`;
+    injectDataLists();
+  } else {
+    fb.innerHTML=`<h3><i class="ti ti-edit"></i> Edit expense <span class="ar">تعديل المصروف</span></h3>
+      <div class="form-grid">
+        <div class="fg"><label>Date <span class="ar">التاريخ</span></label><input type="date" id="f-date" value="${r.date}"/></div>
+        <div class="fg"><label>Client <span class="ar">العميل</span></label>${makeComboSelect('f-client-exp',getClients(),r.client||'','Select client / اختر عميل')}</div>
+        <div class="fg"><label>Project <span class="ar">المشروع</span></label>${makeComboSelect('f-project',getProjects(),r.project,'Select project / اختر مشروع')}</div>
+        <div class="fg"><label>Supplier <span class="ar">المورد</span></label>${makeComboSelect('f-supplier',getSuppliers(),r.supplier||'','Select supplier / اختر مورد')}</div>
+        <div class="fg"><label>Amount SAR <span class="ar">المبلغ</span></label><input type="number" id="f-amount" value="${r.amount}" step="0.01"/></div>
+        <div class="fg"><label>Type <span class="ar">النوع</span></label>
+          <select id="f-type">${getExpTypes().map(t=>`<option value="${t.id}" ${r.type===t.id?'selected':''}>${t.label}</option>`).join('')}</select>
+        </div>
+        <div class="fg full"><label>Description <span class="ar">الوصف</span></label><input type="text" id="f-desc" value="${r.desc.replace(/'/g,"&apos;")}"/></div>
+        <div class="fg"><label>Sheet <span class="ar">الشيت</span></label><select id="f-sheet"><option value="backfilling" ${r.sheet==='backfilling'?'selected':''}>Backfilling / ردم</option><option value="equipment" ${r.sheet==='equipment'?'selected':''}>Equipment / معدات</option></select></div>
+      </div>
+      <div class="form-actions"><button class="btn" onclick="closeForm()">Cancel / إلغاء</button><button class="btn primary" onclick="updateRec('expenses','${r.id}')">Save changes / حفظ التعديل</button></div>`;
+    injectDataLists();
+  }
+}
+
+function editPur(id){
+  const r=DB.purchases.find(x=>x.id===id);
+  if(!r) return;
+  const fo=document.getElementById('form-overlay');
+  const fb=document.getElementById('form-box');
+  fo.classList.add('open');
+  fb.innerHTML=`<h3><i class="ti ti-edit"></i> Edit purchase <span class="ar">تعديل فاتورة الشراء</span></h3>
+    <div class="form-grid">
+      <div class="fg"><label>Date <span class="ar">التاريخ</span></label><input type="date" id="f-date" value="${r.date}"/></div>
+      <div class="fg"><label>Type <span class="ar">النوع</span></label><select id="f-pur-type"><option value="supplier" ${r.type==='supplier'?'selected':''}>Supplier invoice / مورد</option><option value="general" ${r.type==='general'?'selected':''}>General / عام</option></select></div>
+      <div class="fg full"><label>Supplier / Item <span class="ar">المورد / الصنف</span></label><input type="text" id="f-supplier" value="${r.supplier}"/></div>
+      <div class="fg"><label>Amount W/O VAT <span class="ar">بدون ضريبة</span></label><input type="number" id="f-pur-wo" value="${r.wo_vat}" step="0.01" oninput="autoCalcVAT()"/></div>
+      <div class="fg"><label>VAT 15% <span class="ar">الضريبة</span></label><input type="number" id="f-pur-vat" value="${r.vat}" step="0.01"/></div>
+      <div class="fg full"><label>Description <span class="ar">الوصف</span></label><input type="text" id="f-pur-desc" value="${r.desc.replace(/'/g,"&apos;")}"/></div>
+      <div class="fg"><label>Status <span class="ar">الحالة</span></label><select id="f-pur-status"><option value="Refundable" ${r.status==='Refundable'?'selected':''}>Refundable / قابل</option><option value="Pending" ${r.status==='Pending'?'selected':''}>Pending / معلق</option><option value="Refunded" ${r.status==='Refunded'?'selected':''}>Refunded / تم</option></select></div>
+    </div>
+    <div class="form-actions"><button class="btn" onclick="closeForm()">Cancel / إلغاء</button><button class="btn primary" onclick="updatePur('${r.id}')">Save changes / حفظ التعديل</button></div>`;
+}
+
+function editVP(id){
+  const r=DB.vatPayments.find(x=>x.id===id);
+  if(!r) return;
+  const fo=document.getElementById('form-overlay');
+  const fb=document.getElementById('form-box');
+  fo.classList.add('open');
+  fb.innerHTML=`<h3><i class="ti ti-edit"></i> Edit VAT payment <span class="ar">تعديل دفعة الضريبة</span></h3>
+    <div class="form-grid">
+      <div class="fg"><label>Date <span class="ar">التاريخ</span></label><input type="date" id="f-date" value="${r.date}"/></div>
+      <div class="fg"><label>Period <span class="ar">الفترة</span></label><input type="text" id="f-vp-period" value="${r.period||''}"/></div>
+      <div class="fg"><label>Amount SAR <span class="ar">المبلغ</span></label><input type="number" id="f-vp-amount" value="${r.amount}" step="0.01"/></div>
+      <div class="fg full"><label>Description <span class="ar">الوصف</span></label><input type="text" id="f-vp-desc" value="${r.desc.replace(/'/g,"&apos;")}"/></div>
+    </div>
+    <div class="form-actions"><button class="btn" onclick="closeForm()">Cancel / إلغاء</button><button class="btn primary" onclick="updateVP('${r.id}')">Save changes / حفظ التعديل</button></div>`;
+}
+
+// ─── UPDATE FUNCTIONS ───────────────────────────────────────────────────────
+
+function updateRec(type, id){
+  if(type==='income'){
+    const r=DB.income.find(x=>x.id===id); if(!r) return;
+    const wo=parseFloat(document.getElementById('f-wo').value)||0;
+    const v=parseFloat(document.getElementById('f-vat').value)||0;
+    r.date=document.getElementById('f-date').value;
+    r.client=comboVal('f-client')||r.client;
+    r.project=comboVal('f-project-inc');
+    r.wo_vat=wo; r.vat=v; r.total=parseFloat((wo+v).toFixed(2));
+    r.desc=document.getElementById('f-desc').value||r.desc;
+    r.status=document.getElementById('f-status').value;
+    r.sheet=document.getElementById('f-sheet').value;
+    if(r.status==='Partially Paid'){
+      r.paidAmount=parseFloat(document.getElementById('f-paid-partial')?.value||0);
+    } else if(r.status==='Paid'){
+      r.paidAmount=r.total;
+    } else {
+      r.paidAmount=0;
+    }
+  } else {
+    const r=DB.expenses.find(x=>x.id===id); if(!r) return;
+    r.date=document.getElementById('f-date').value;
+    r.client=comboVal('f-client-exp');
+    r.project=comboVal('f-project')||r.project;
+    r.supplier=comboVal('f-supplier');
+    r.amount=parseFloat(document.getElementById('f-amount').value)||r.amount;
+    r.desc=document.getElementById('f-desc').value||r.desc;
+    r.type=document.getElementById('f-type').value;
+    r.sheet=document.getElementById('f-sheet').value;
+  }
+  saveData(); closeForm(); populateSelects();
+  renderOverview(); renderProjects();
+  if(type==='income') renderIncome(); else renderExpenses();
+}
+
+function updatePur(id){
+  const r=DB.purchases.find(x=>x.id===id); if(!r) return;
+  const wo=parseFloat(document.getElementById('f-pur-wo').value)||0;
+  const v=parseFloat(document.getElementById('f-pur-vat').value)||parseFloat((wo*0.15).toFixed(2));
+  r.date=document.getElementById('f-date').value;
+  r.type=document.getElementById('f-pur-type').value;
+  r.supplier=document.getElementById('f-supplier').value||r.supplier;
+  r.wo_vat=wo; r.vat=v; r.total=parseFloat((wo+v).toFixed(2));
+  r.desc=document.getElementById('f-pur-desc').value||r.desc;
+  r.status=document.getElementById('f-pur-status').value;
+  saveData(); closeForm(); renderPurchases(); renderVAT(); renderOverview();
+}
+
+function updateVP(id){
+  const r=DB.vatPayments.find(x=>x.id===id); if(!r) return;
+  r.date=document.getElementById('f-date').value;
+  r.period=document.getElementById('f-vp-period').value||r.period;
+  r.amount=parseFloat(document.getElementById('f-vp-amount').value)||r.amount;
+  r.desc=document.getElementById('f-vp-desc').value||r.desc;
+  saveData(); closeForm(); renderVAT(); renderOverview();
+}
+
+
+// ─── DATA PAGE ──────────────────────────────────────────────────────────────
+
+// ─── CAPITAL PAGE ───────────────────────────────────────────────────────────
+function calcBalances(){
+  // ── Income ──────────────────────────────────────────────────────────────
+  const totalInWithVAT   = DB.income.reduce((s,r)=>s+r.total,0);
+  const pendingWithVAT   = DB.income.filter(r=>r.status==='Pending').reduce((s,r)=>s+r.total,0);
+  const partialRemaining = DB.income.filter(r=>r.status==='Partially Paid').reduce((s,r)=>s+(r.total-(r.paidAmount||0)),0);
+  const totalNotReceived = pendingWithVAT + partialRemaining;
+  const totalReceived    = totalInWithVAT - totalNotReceived;
+
+  // ── Expenses ─────────────────────────────────────────────────────────────
+  const totalExpenses = DB.expenses.reduce((s,r)=>s+r.amount,0);
+
+  // ── VAT ──────────────────────────────────────────────────────────────────
+  const vatCollected = DB.income.reduce((s,r)=>s+r.vat,0);
+  const vatPaid      = DB.vatPayments.reduce((s,r)=>s+r.amount,0);
+  const vatRemaining = (()=>{
+    // vatRemaining = collected - total purchases VAT (refundable from govt) - already paid to govt
+    const purVAT = DB.purchases.reduce((s,r)=>s+r.vat,0);
+    return Math.max(0, vatCollected - purVAT - vatPaid);
+  })();
+
+  // ── Capital ───────────────────────────────────────────────────────────────
+  const totalAssets = (DB.assets||[]).reduce((s,r)=>s+r.amount,0);
+  const totalDist   = (DB.distributions||[]).reduce((s,r)=>s+r.amount,0);
+
+  // ── Net Profit ────────────────────────────────────────────────────────────
+  // = Total In (with VAT) − Total Expenses − VAT Paid − VAT Remaining
+  const netProfit = totalInWithVAT - totalExpenses - vatPaid - vatRemaining;
+
+  // ── Available Balance (paper) ─────────────────────────────────────────────
+  // = Net Profit + Assets − Distributions
+  const availableBalance = netProfit + totalAssets - totalDist;
+
+  // ── Account Balance (actual cash) ────────────────────────────────────────
+  // = (Total Received − Total Expenses) + Assets − Distributions − VAT Paid
+  const cashFlow     = totalReceived - totalExpenses;
+  const accountBalance = cashFlow + totalAssets - totalDist - vatPaid;
+
+  return {
+    totalInWithVAT, pendingWithVAT, partialRemaining, totalNotReceived,
+    totalReceived, totalExpenses, vatCollected, vatPaid, vatRemaining,
+    totalAssets, totalDist, netProfit, availableBalance, accountBalance, cashFlow
+  };
+}
+
+function renderCapital(){
+  const B = calcBalances();
+
+  // ── Metrics ───────────────────────────────────────────────────────────────
+  document.getElementById('cap-metrics').innerHTML=`
+    <div class="metric">
+      <div class="lbl">Net Profit <span class="ar">صافي الربح</span></div>
+      <div class="val ${B.netProfit>=0?'green':'red'}">${SAR(B.netProfit)}</div>
+    </div>
+    <div class="metric">
+      <div class="lbl">Available Balance <span class="ar">الرصيد المتاح</span></div>
+      <div class="val blue">${SAR(B.availableBalance)}</div>
+    </div>
+    <div class="metric">
+      <div class="lbl">Account Balance <span class="ar">رصيد الحساب الفعلي</span></div>
+      <div class="val ${B.accountBalance>=0?'green':'red'}">${SAR(B.accountBalance)}</div>
+    </div>
+    <div class="metric">
+      <div class="lbl">Total Distributed <span class="ar">إجمالي التوزيعات</span></div>
+      <div class="val red">${SAR(B.totalDist)}</div>
+    </div>`;
+
+  // ── Assets table ─────────────────────────────────────────────────────────
+  document.getElementById('assets-tbody').innerHTML =
+    (DB.assets||[]).sort((a,b)=>a.date.localeCompare(b.date)).map(r=>`
+      <tr>
+        <td>${r.date}</td>
+        <td style="font-weight:500;color:#185FA5">${fmt2(r.amount)}</td>
+        <td title="${r.note||''}" style="color:#888;font-size:11px">${r.note||'—'}</td>
+        <td style="display:flex;gap:3px">
+          <button class="btn sm" onclick="editCapItem('asset','${r.id}')" style="padding:1px 6px;height:22px"><i class="ti ti-pencil" style="font-size:11px"></i></button>
+          <button class="btn sm danger" onclick="delCapItem('asset','${r.id}')" style="padding:1px 6px;height:22px"><i class="ti ti-x" style="font-size:11px"></i></button>
+        </td>
+      </tr>`).join('') || '<tr><td colspan="4" style="color:#aaa;font-size:12px;padding:8px">No records / لا يوجد</td></tr>';
+
+  document.getElementById('cap-assets-total').textContent = SAR(B.totalAssets);
+
+  // ── Distributions table ───────────────────────────────────────────────────
+  document.getElementById('dist-tbody').innerHTML =
+    (DB.distributions||[]).sort((a,b)=>a.date.localeCompare(b.date)).map(r=>`
+      <tr>
+        <td>${r.date}</td>
+        <td style="font-weight:500;color:#D85A30">${fmt2(r.amount)}</td>
+        <td title="${r.note||''}" style="color:#888;font-size:11px">${r.note||'—'}</td>
+        <td style="display:flex;gap:3px">
+          <button class="btn sm" onclick="editCapItem('dist','${r.id}')" style="padding:1px 6px;height:22px"><i class="ti ti-pencil" style="font-size:11px"></i></button>
+          <button class="btn sm danger" onclick="delCapItem('dist','${r.id}')" style="padding:1px 6px;height:22px"><i class="ti ti-x" style="font-size:11px"></i></button>
+        </td>
+      </tr>`).join('') || '<tr><td colspan="4" style="color:#aaa;font-size:12px;padding:8px">No records / لا يوجد</td></tr>';
+
+  document.getElementById('cap-dist-total').textContent = SAR(B.totalDist);
+
+  // ── Breakdown ─────────────────────────────────────────────────────────────
+  document.getElementById('cap-breakdown-rows').innerHTML=`
+    <div class="stmnt-row">
+      <span class="stmnt-lbl">Total income (with VAT) <span class="ar">إجمالي الإيرادات مع الضريبة</span></span>
+      <span style="color:#185FA5">${SAR(B.totalInWithVAT)}</span>
+    </div>
+    <div class="stmnt-row">
+      <span class="stmnt-lbl" style="padding-right:10px;color:#aaa">— Pending / not received yet <span class="ar">فواتير معلقة لم تُحصَّل</span></span>
+      <span style="color:#BA7517">(${SAR(B.totalNotReceived)})</span>
+    </div>
+    <div class="stmnt-row">
+      <span class="stmnt-lbl" style="padding-right:10px;color:#aaa">= Total received <span class="ar">إجمالي المحصّل فعلاً</span></span>
+      <span>${SAR(B.totalReceived)}</span>
+    </div>
+    <div class="stmnt-row">
+      <span class="stmnt-lbl">Total expenses <span class="ar">إجمالي المصروفات</span></span>
+      <span style="color:#D85A30">(${SAR(B.totalExpenses)})</span>
+    </div>
+    <div class="stmnt-row">
+      <span class="stmnt-lbl">VAT paid to government <span class="ar">ضريبة مدفوعة للحكومة</span></span>
+      <span style="color:#D85A30">(${SAR(B.vatPaid)})</span>
+    </div>
+    <div class="stmnt-row">
+      <span class="stmnt-lbl">VAT remaining to pay <span class="ar">ضريبة متبقية للدفع</span></span>
+      <span style="color:#D85A30">(${SAR(B.vatRemaining)})</span>
+    </div>
+    <div class="stmnt-row total">
+      <span class="stmnt-lbl">Net Profit <span class="ar">صافي الربح</span></span>
+      <span style="color:${B.netProfit>=0?'#1D9E75':'#D85A30'}">${SAR(B.netProfit)}</span>
+    </div>
+    <div style="border-top:1px solid #eee;margin:10px 0"></div>
+    <div class="stmnt-row">
+      <span class="stmnt-lbl">Net Profit <span class="ar">صافي الربح</span></span>
+      <span>${SAR(B.netProfit)}</span>
+    </div>
+    <div class="stmnt-row">
+      <span class="stmnt-lbl">+ Assets (opening capital) <span class="ar">+ رأس المال</span></span>
+      <span style="color:#185FA5">+ ${SAR(B.totalAssets)}</span>
+    </div>
+    <div class="stmnt-row">
+      <span class="stmnt-lbl">− Distributions <span class="ar">− توزيعات الأرباح</span></span>
+      <span style="color:#D85A30">− ${SAR(B.totalDist)}</span>
+    </div>
+    <div class="stmnt-row total">
+      <span class="stmnt-lbl">Available Balance <span class="ar">الرصيد المتاح</span></span>
+      <span style="color:#185FA5">${SAR(B.availableBalance)}</span>
+    </div>
+    <div style="border-top:1px solid #eee;margin:10px 0"></div>
+    <div class="stmnt-row">
+      <span class="stmnt-lbl">Cash flow (received − expenses) <span class="ar">التدفق النقدي</span></span>
+      <span>${SAR(B.cashFlow)}</span>
+    </div>
+    <div class="stmnt-row">
+      <span class="stmnt-lbl">+ Assets <span class="ar">+ رأس المال</span></span>
+      <span>+ ${SAR(B.totalAssets)}</span>
+    </div>
+    <div class="stmnt-row">
+      <span class="stmnt-lbl">− Distributions <span class="ar">− التوزيعات</span></span>
+      <span>− ${SAR(B.totalDist)}</span>
+    </div>
+    <div class="stmnt-row">
+      <span class="stmnt-lbl">− VAT paid <span class="ar">− ضريبة مدفوعة</span></span>
+      <span>− ${SAR(B.vatPaid)}</span>
+    </div>
+    <div class="stmnt-row total">
+      <span class="stmnt-lbl">Account Balance (actual cash) <span class="ar">رصيد الحساب الفعلي</span></span>
+      <span style="color:${B.accountBalance>=0?'#1D9E75':'#D85A30'}">${SAR(B.accountBalance)}</span>
+    </div>`;
+}
+
+function editCapItem(type, id){
+  const arr = type==='asset' ? DB.assets : DB.distributions;
+  const r = arr.find(x=>x.id===id);
+  if(!r) return;
+  const fo=document.getElementById('form-overlay');
+  const fb=document.getElementById('form-box');
+  fo.classList.add('open');
+  const label = type==='asset' ? 'Capital entry / رأس مال' : 'Distribution / توزيع أرباح';
+  fb.innerHTML=`<h3><i class="ti ti-pencil"></i> Edit ${label}</h3>
+    <div class="form-grid">
+      <div class="fg"><label>Date <span class="ar">التاريخ</span></label><input type="date" id="f-date" value="${r.date}"/></div>
+      <div class="fg"><label>Amount SAR <span class="ar">المبلغ</span></label><input type="number" id="f-cap-amount" value="${r.amount}" step="0.01"/></div>
+      <div class="fg full"><label>Note <span class="ar">ملاحظة</span></label><input type="text" id="f-cap-note" value="${r.note||''}"/></div>
+    </div>
+    <div class="form-actions">
+      <button class="btn" onclick="closeForm()">Cancel / إلغاء</button>
+      <button class="btn primary" onclick="updateCapItem('${type}','${r.id}')">Save / حفظ</button>
+    </div>`;
+}
+
+function updateCapItem(type, id){
+  const arr = type==='asset' ? DB.assets : DB.distributions;
+  const r = arr.find(x=>x.id===id);
+  if(!r) return;
+  r.date   = document.getElementById('f-date').value;
+  r.amount = parseFloat(document.getElementById('f-cap-amount').value)||r.amount;
+  r.note   = document.getElementById('f-cap-note').value||'';
+  saveData(); closeForm(); renderCapital(); renderOverview();
+}
+
+function delCapItem(type, id){
+  const label = type==='asset' ? 'capital entry / رأس مال' : 'distribution / توزيع';
+  if(!confirm('Delete this '+label+'?\nحذف هذا السجل؟')) return;
+  if(type==='asset')        DB.assets        = DB.assets.filter(x=>x.id!==id);
+  else                       DB.distributions = DB.distributions.filter(x=>x.id!==id);
+  saveData(); renderCapital(); renderOverview();
+}
+
+function renderData(){
+  const md=DB.masterData;
+  if(!md) return;
+
+  const makeRow = (listKey, name, i) => {
+    const escapedName = name.replace(/'/g,"\\'");
+    return `<div style="display:flex;justify-content:space-between;align-items:center;padding:5px 6px;border-bottom:0.5px solid #f0f0ee;font-size:12px">
+      <span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${name}</span>
+      <div style="display:flex;gap:3px;flex-shrink:0">
+        <button class="btn sm" onclick="editDataItem('${listKey}',${i})" style="padding:1px 6px;height:22px" title="Rename / إعادة تسمية"><i class="ti ti-pencil" style="font-size:11px"></i></button>
+        <button class="btn sm danger" onclick="removeDataItem('${listKey}',${i})" style="padding:1px 6px;height:22px" title="Delete / حذف"><i class="ti ti-x" style="font-size:11px"></i></button>
+      </div>
+    </div>`;
+  };
+
+  const noItems = '<div style="color:#aaa;font-size:12px;padding:8px">No items / لا يوجد</div>';
+
+  document.getElementById('data-clients').innerHTML =
+    md.clients.length ? md.clients.map((c,i)=>makeRow('clients',c,i)).join('') : noItems;
+
+  document.getElementById('data-projects').innerHTML =
+    md.projects.length ? md.projects.map((p,i)=>makeRow('projects',p,i)).join('') : noItems;
+
+  document.getElementById('data-suppliers').innerHTML =
+    md.suppliers.length ? md.suppliers.map((s,i)=>makeRow('suppliers',s,i)).join('') : noItems;
+
+  // Expense types row (different structure - has id + label)
+  document.getElementById('data-exptypes').innerHTML =
+    md.expTypes.length ? md.expTypes.map((t,i)=>`
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:5px 6px;border-bottom:0.5px solid #f0f0ee;font-size:12px">
+      <span style="flex:1"><span class="badge b-${t.id==='equipment'?'equipment':t.id==='labor'?'labor':t.id==='admin'?'admin':t.id==='vat'?'vat':'other'}" style="margin-right:6px">${t.id}</span>${t.label}</span>
+      <div style="display:flex;gap:3px;flex-shrink:0">
+        <button class="btn sm" onclick="editDataItem('expTypes',${i})" style="padding:1px 6px;height:22px" title="Edit / تعديل"><i class="ti ti-pencil" style="font-size:11px"></i></button>
+        <button class="btn sm danger" onclick="removeDataItem('expTypes',${i})" style="padding:1px 6px;height:22px" title="Delete / حذف"><i class="ti ti-x" style="font-size:11px"></i></button>
+      </div>
+    </div>`).join('') : noItems;
+}
+
+function addDataItem(listKey){
+  const fo=document.getElementById('form-overlay');
+  const fb=document.getElementById('form-box');
+  fo.classList.add('open');
+  const labels={clients:'Client / العميل',projects:'Project or supplier / المشروع أو المورد',suppliers:'Supplier / المورد',expTypes:'Expense type / نوع المصروف'};
+  const isType=listKey==='expTypes';
+  fb.innerHTML=`<h3><i class="ti ti-plus"></i> Add to ${labels[listKey]||listKey}</h3>
+    <div class="form-grid">
+      <div class="fg full"><label>Name <span class="ar">الاسم</span></label><input type="text" id="f-data-name" placeholder="${isType?'e.g. rentals':'e.g. NESMA'}"/></div>
+      ${isType?`<div class="fg full"><label>ID (no spaces) <span class="ar">المعرف بدون مسافات</span></label><input type="text" id="f-data-id" placeholder="e.g. rentals"/></div>`:''}
+    </div>
+    <div class="form-actions"><button class="btn" onclick="closeForm()">Cancel / إلغاء</button><button class="btn primary" onclick="saveDataItem('${listKey}')">Add / إضافة</button></div>`;
+}
+
+function saveDataItem(listKey){
+  const name=document.getElementById('f-data-name').value.trim();
+  if(!name){alert('Please enter a name / أدخل اسماً');return;}
+  const md=DB.masterData;
+  if(listKey==='expTypes'){
+    const idEl=document.getElementById('f-data-id');
+    const id=(idEl?idEl.value.trim():name.toLowerCase().replace(/\s+/g,'_'))||name.toLowerCase().replace(/\s+/g,'_');
+    if(md.expTypes.find(t=>t.id===id)){alert('ID already exists / المعرف موجود مسبقاً');return;}
+    md.expTypes.push({id,label:name});
+  } else {
+    if(md[listKey].includes(name)){alert('Already exists / موجود مسبقاً');return;}
+    md[listKey].push(name);
+    md[listKey].sort();
+  }
+  saveData();closeForm();renderData();refreshDataLists();
+  populateSelects();// refresh all dropdowns
+}
+
+function editDataItem(listKey, idx){
+  const md=DB.masterData;
+  const item=md[listKey][idx];
+  const isType=listKey==='expTypes';
+  const oldName=isType?item.label:item;
+  const oldId=isType?item.id:'';
+  const fo=document.getElementById('form-overlay');
+  const fb=document.getElementById('form-box');
+  fo.classList.add('open');
+  fb.innerHTML=`<h3><i class="ti ti-pencil"></i> Rename / إعادة تسمية</h3>
+    <div class="form-grid">
+      <div class="fg full"><label>New name <span class="ar">الاسم الجديد</span></label>
+        <input type="text" id="f-rename-new" value="${oldName.replace(/"/g,'&quot;')}" style="font-size:14px;padding:8px 10px"/>
+      </div>
+      ${isType?`<div class="fg full"><label>ID (no spaces) <span class="ar">المعرف</span></label><input type="text" id="f-rename-id" value="${oldId}" style="font-size:14px;padding:8px 10px"/></div>`:''}
+    </div>
+    <p class="hint" style="margin-top:8px">Will update everywhere automatically / سيُحدَّث في كل مكان تلقائياً</p>
+    <div class="form-actions">
+      <button class="btn" onclick="closeForm()">Cancel / إلغاء</button>
+      <button class="btn primary" onclick="applyRename('${listKey}',${idx},'${oldName.replace(/'/g,"\\'")}','${oldId}')">Save / حفظ</button>
+    </div>`;
+}
+
+function applyRename(listKey, idx, oldName, oldId){
+  const newName=document.getElementById('f-rename-new').value.trim();
+  if(!newName){alert('Please enter a name / أدخل اسماً');return;}
+  const md=DB.masterData;
+  const isType=listKey==='expTypes';
+  const newId=isType?(document.getElementById('f-rename-id')?.value.trim()||oldId):null;
+  if(isType){
+    md.expTypes[idx]={id:newId,label:newName};
+    if(newId!==oldId) DB.expenses.forEach(r=>{if(r.type===oldId) r.type=newId;});
+  } else {
+    md[listKey][idx]=newName;
+    md[listKey].sort();
+    if(listKey==='clients'){
+      // Update client name in income AND expenses
+      DB.income.forEach(r=>{if(r.client===oldName) r.client=newName;});
+      DB.expenses.forEach(r=>{if(r.client===oldName) r.client=newName;});
+    } else if(listKey==='projects'){
+      // Update project name in income AND expenses
+      DB.income.forEach(r=>{if(r.project===oldName) r.project=newName;});
+      DB.expenses.forEach(r=>{if(r.project===oldName) r.project=newName;});
+    } else if(listKey==='suppliers'){
+      DB.purchases.forEach(r=>{if(r.supplier===oldName) r.supplier=newName;});
+      DB.expenses.forEach(r=>{if(r.supplier===oldName) r.supplier=newName;});
+    }
+  }
+  saveData();closeForm();
+  renderData();refreshDataLists();populateSelects();
+  renderOverview();renderProjects();renderIncome();renderExpenses();renderPurchases();
+}
+
+function removeDataItem(listKey,idx){
+  const md=DB.masterData;
+  const item=md[listKey][idx];
+  if(!confirm('Remove "'+item+'" from the list?\nحذف العنصر من القائمة؟'))return;
+  md[listKey].splice(idx,1);
+  saveData();renderData();populateSelects();
+}
+
+
+
+
+function makeComboSelect(id, items, currentVal, placeholder){
+  const hasVal = currentVal && currentVal.length > 0;
+  const inList = hasVal && items.includes(currentVal);
+  const opts = items.map(v=>`<option value="${v}" ${v===currentVal?'selected':''}>${v}</option>`).join('');
+  return `<div class="combo-wrap">
+    <select id="${id}-sel" onchange="comboChange('${id}')">
+      <option value="">${placeholder||'-- Select --'}</option>
+      ${opts}
+      <option value="__new__" ${!inList&&hasVal?'selected':''}>✏️ Type manually / اكتب يدوياً</option>
+    </select>
+    <input class="combo-free" id="${id}-txt" type="text" 
+      placeholder="Type name / اكتب الاسم"
+      value="${!inList&&hasVal?currentVal:''}"
+      style="display:${!inList&&hasVal?'block':'none'}"/>
+  </div>`;
+}
+
+function comboChange(id){
+  const sel = document.getElementById(id+'-sel');
+  const txt = document.getElementById(id+'-txt');
+  if(!sel||!txt) return;
+  if(sel.value==='__new__'){
+    txt.style.display='block';
+    txt.focus();
+  } else {
+    txt.style.display='none';
+    txt.value='';
+  }
+}
+
+function comboVal(id){
+  const sel = document.getElementById(id+'-sel');
+  const txt = document.getElementById(id+'-txt');
+  if(!sel) return '';
+  if(sel.value==='__new__') return txt?txt.value.trim():'';
+  return sel.value;
+}
+
+function injectDataLists(){
+  // Remove any old injected datalists inside modal
+  document.querySelectorAll('.modal [data-injected]').forEach(el=>el.remove());
+  const modal = document.getElementById('form-box');
+  if(!modal) return;
+  // For each input with list="dl-*", create a fresh datalist INSIDE the modal
+  modal.querySelectorAll('input[list]').forEach(input=>{
+    const listId = input.getAttribute('list');
+    const source = document.getElementById(listId);
+    if(!source) return;
+    // Create a local copy inside the modal with a unique id
+    const localId = 'local-' + listId;
+    let local = modal.querySelector('#'+localId);
+    if(!local){
+      local = document.createElement('datalist');
+      local.id = localId;
+      local.setAttribute('data-injected','1');
+      modal.appendChild(local);
+    }
+    local.innerHTML = source.innerHTML;
+    input.setAttribute('list', localId);
+  });
+}
+
+function refreshDataLists(){
+  const fill=(id,items)=>{
+    const dl=document.getElementById(id);
+    if(!dl)return;
+    dl.innerHTML=items.map(v=>`<option value="${v}">${v}</option>`).join('');
+  };
+  fill('dl-clients', getClients());
+  fill('dl-projects', getProjects());
+  fill('dl-suppliers', getSuppliers());
+}
+
+function populateSelects(){
+  refreshDataLists();
+  // populate exp-type filter dynamically
+  const etEl=document.getElementById('exp-type');
+  if(etEl){
+    const cur=etEl.value;
+    etEl.innerHTML='<option value="">All types / كل الأنواع</option>';
+    getExpTypes().forEach(t=>{const o=document.createElement('option');o.value=t.id;o.textContent=t.label;if(t.id===cur)o.selected=true;etEl.appendChild(o);});
+  }
+
+  const clients=getClients();
+  ['inc-client','proj-filter'].forEach(id=>{
+    const el=document.getElementById(id);el.innerHTML=`<option value="">${id==='inc-client'?'All clients / كل العملاء':'All clients / كل العملاء'}</option>`;
+    clients.forEach(c=>{const o=document.createElement('option');o.value=c;o.textContent=c;el.appendChild(o)});
+  });
+  const ep=document.getElementById('exp-proj');ep.innerHTML='<option value="">All projects / كل المشاريع</option>';
+  getProjects().forEach(p=>{const o=document.createElement('option');o.value=p;o.textContent=p;ep.appendChild(o)});
+  const sc=document.getElementById('stmt-client');
+  if(sc){
+    const curClient=sc.value;
+    const stype=stmtClientType||'client';
+    const opts=stype==='client'?clients:stype==='project'?getProjects():getSuppliers();
+    sc.innerHTML='<option value="">-- Select / اختر --</option>';
+    opts.forEach(o=>{const el=document.createElement('option');el.value=o;el.textContent=o;if(o===curClient)el.selected=true;sc.appendChild(el);});
+  }
+  // populate stmt-proj-filter with clients (income) + projects (expenses)
+  const spf=document.getElementById('stmt-proj-filter');
+  if(spf){
+    const curP=spf.value;
+    const allProjs=[...new Set([...DB.income.map(r=>r.client),...DB.expenses.map(r=>r.project)])].filter(Boolean).sort();
+    spf.innerHTML='<option value="">All projects / كل المشاريع</option>';
+    allProjs.forEach(p=>{const o=document.createElement('option');o.value=p;o.textContent=p;if(p===curP)o.selected=true;spf.appendChild(o);});
+  }
+  const years=[...new Set([...DB.income,...DB.expenses].map(r=>r.date.slice(0,4)))].sort().reverse();
+  ['mon-year','stmt-year','stmt-client-year'].forEach(id=>{
+    const el=document.getElementById(id);if(!el)return;
+    el.innerHTML=`<option value="">${id==='mon-year'?'All years / كل السنوات':'All periods / كل الفترات'}</option>`;
+    years.forEach(y=>{const o=document.createElement('option');o.value=y;o.textContent=y;el.appendChild(o)});
+  });
+}
+
+function delRec(type,id){
+  if(!confirm('Delete this record?\nحذف هذا السجل؟'))return;
+  if(type==='income')DB.income=DB.income.filter(r=>r.id!==id);
+  else DB.expenses=DB.expenses.filter(r=>r.id!==id);
+  saveData();populateSelects();
+  if(type==='income')renderIncome();else renderExpenses();
+  renderOverview();
+}
+
+function showForm(type){
+  const fo=document.getElementById('form-overlay');
+  const fb=document.getElementById('form-box');
+  fo.classList.add('open');
+  if(type==='income'){
+    fb.innerHTML=`<h3><i class="ti ti-arrow-up-right"></i> Add invoice <span class="ar">إضافة فاتورة إيراد</span></h3>
+      <div class="form-grid">
+        <div class="fg"><label>Date <span class="ar">التاريخ</span></label><input type="date" id="f-date" value="${new Date().toISOString().slice(0,10)}"/></div>
+        <div class="fg"><label>Client <span class="ar">العميل</span></label>${makeComboSelect('f-client',getClients(),'','Select client / اختر عميل')}</div>
+        <div class="fg"><label>Project <span class="ar">المشروع</span></label>${makeComboSelect('f-project-inc',getProjects(),'','Select project / اختر مشروع')}</div>
+        <div class="fg"><label>Amount W/O VAT <span class="ar">المبلغ بدون ضريبة</span></label><input type="number" id="f-wo" placeholder="0" step="0.01" oninput="calcAddVAT()"/></div>
+        <div class="fg"><label>VAT type <span class="ar">نوع الضريبة</span></label>
+          <select id="f-vat-type" onchange="calcAddVAT()" style="margin-bottom:4px">
+            <option value="15">VAT 15% / خاضع للضريبة</option>
+            <option value="0">0% / بدون ضريبة</option>
+          </select>
+          <input type="number" id="f-vat" placeholder="0" step="0.01" style="background:#f5f5f3" readonly/>
+        </div>
+        <div class="fg full"><label>Description <span class="ar">الوصف / رقم الفاتورة</span></label><input type="text" id="f-desc" placeholder="Invoice No ..."/></div>
+        <div class="fg"><label>Status <span class="ar">الحالة</span></label><select id="f-status" onchange="togglePartial(this.value,'add-partial-wrap')">
+            <option value="Paid">Paid / مدفوع بالكامل</option>
+            <option value="Pending">Pending / معلق</option>
+            <option value="Partially Paid">Partially Paid / مدفوع جزئياً</option>
+          </select></div>
+        <div class="fg"><label>Sheet <span class="ar">الشيت</span></label><select id="f-sheet"><option value="backfilling">Backfilling / ردم</option><option value="equipment">Equipment / معدات</option></select></div>
+        <div class="fg full" id="add-partial-wrap" style="display:none;flex-direction:column;gap:3px">
+          <label>Amount paid so far <span class="ar">المبلغ المدفوع حتى الآن</span></label>
+          <input type="number" id="f-paid-partial" placeholder="0" step="0.01"/>
+        </div>
+      </div>
+      <p class="hint">Select VAT type — 15% calculates automatically / اختر نوع الضريبة وسيُحسب المبلغ تلقائياً</p>
+      <div class="form-actions"><button class="btn" onclick="closeForm()">Cancel / إلغاء</button><button class="btn primary" onclick="saveForm('income')">Save invoice / حفظ الفاتورة</button></div>`;
+    injectDataLists();
+  } else if(type==='expense'){
+    fb.innerHTML=`<h3><i class="ti ti-arrow-down-left"></i> Add expense <span class="ar">إضافة مصروف</span></h3>
+      <div class="form-grid">
+        <div class="fg"><label>Date <span class="ar">التاريخ</span></label><input type="date" id="f-date" value="${new Date().toISOString().slice(0,10)}"/></div>
+        <div class="fg"><label>Client <span class="ar">العميل</span></label>${makeComboSelect('f-client-exp',getClients(),'','Select client / اختر عميل')}</div>
+        <div class="fg"><label>Project <span class="ar">المشروع</span></label>${makeComboSelect('f-project',getProjects(),'','Select project / اختر مشروع')}</div>
+        <div class="fg"><label>Supplier <span class="ar">المورد</span></label>${makeComboSelect('f-supplier',getSuppliers(),'','Select supplier / اختر مورد')}</div>
+        <div class="fg"><label>Amount SAR <span class="ar">المبلغ بالريال</span></label><input type="number" id="f-amount" placeholder="0" step="0.01"/></div>
+        <div class="fg"><label>Type <span class="ar">نوع المصروف</span></label>
+          <select id="f-type">
+            <option value="equipment">Equipment / معدات</option>
+            <option value="labor">Labor / عمالة وموردون</option>
+            <option value="admin">Admin / مصروفات إدارية (overhead)</option>
+            <option value="running">Running cost / مصاريف تشغيل شهرية</option>
+            <option value="vat">VAT payment / دفع ضريبة قيمة مضافة</option>
+            <option value="other">Other / أخرى</option>
+          </select>
+        </div>
+        <div class="fg full"><label>Description <span class="ar">الوصف</span></label><input type="text" id="f-desc" placeholder="Details..."/></div>
+        <div class="fg"><label>Sheet <span class="ar">الشيت</span></label><select id="f-sheet"><option value="backfilling">Backfilling / ردم</option><option value="equipment">Equipment / معدات</option></select></div>
+      </div>
+      <div class="form-actions"><button class="btn" onclick="closeForm()">Cancel / إلغاء</button><button class="btn primary" onclick="saveForm('expense')">Save expense / حفظ المصروف</button></div>`;
+    injectDataLists();
+  } else if(type==='purchase'){
+    fb.innerHTML=`<h3><i class="ti ti-shopping-cart"></i> Add purchase <span class="ar">إضافة فاتورة مشتريات</span></h3>
+      <div class="form-grid">
+        <div class="fg"><label>Date <span class="ar">التاريخ</span></label><input type="date" id="f-date" value="${new Date().toISOString().slice(0,10)}"/></div>
+        <div class="fg"><label>Type <span class="ar">النوع</span></label>
+          <select id="f-pur-type" onchange="autoCalcVAT()">
+            <option value="supplier">Supplier invoice / فاتورة مورد</option>
+            <option value="general">General purchase / مشتريات عامة</option>
+          </select>
+        </div>
+        <div class="fg full"><label>Supplier / Item name <span class="ar">اسم المورد / الصنف</span></label><input type="text" id="f-supplier" placeholder="e.g. Main Supplier / المورد الرئيسي"/></div>
+        <div class="fg"><label>Amount W/O VAT <span class="ar">المبلغ بدون ضريبة</span></label><input type="number" id="f-pur-wo" placeholder="0" step="0.01" oninput="autoCalcVAT()"/></div>
+        <div class="fg"><label>VAT 15% <span class="ar">الضريبة 15%</span></label><input type="number" id="f-pur-vat" placeholder="Auto / تلقائي" step="0.01" style="background:#f5f5f3"/></div>
+        <div class="fg full"><label>Description <span class="ar">الوصف</span></label><input type="text" id="f-pur-desc" placeholder="Invoice No. / وصف الفاتورة"/></div>
+        <div class="fg"><label>Status <span class="ar">الحالة</span></label>
+          <select id="f-pur-status">
+            <option value="Refundable">Refundable / قابل للاسترداد</option>
+            <option value="Pending">Pending / معلق</option>
+            <option value="Refunded">Refunded / تم الاسترداد</option>
+          </select>
+        </div>
+      </div>
+      <p class="hint">VAT is auto-calculated as 15% of the amount / الضريبة تُحسب تلقائياً 15% من المبلغ</p>
+      <div class="form-actions"><button class="btn" onclick="closeForm()">Cancel / إلغاء</button><button class="btn primary" onclick="saveForm('purchase')">Save / حفظ</button></div>`;
+  } else if(type==='vatpayment'){
+    fb.innerHTML=`<h3><i class="ti ti-send"></i> Add VAT payment <span class="ar">إضافة دفعة ضريبة للحكومة</span></h3>
+      <div class="form-grid">
+        <div class="fg"><label>Date <span class="ar">التاريخ</span></label><input type="date" id="f-date" value="${new Date().toISOString().slice(0,10)}"/></div>
+        <div class="fg"><label>Period <span class="ar">الفترة الضريبية</span></label><input type="text" id="f-vp-period" placeholder="e.g. Q2 2026"/></div>
+        <div class="fg"><label>Amount SAR <span class="ar">المبلغ المدفوع</span></label><input type="number" id="f-vp-amount" placeholder="0" step="0.01"/></div>
+        <div class="fg full"><label>Description <span class="ar">الوصف</span></label><input type="text" id="f-vp-desc" placeholder="VAT payment to ZATCA..."/></div>
+      </div>
+      <p class="hint">This amount will reduce the remaining VAT due / هذا المبلغ سيُخصم من المتبقي المطلوب دفعه</p>
+      <div class="form-actions"><button class="btn" onclick="closeForm()">Cancel / إلغاء</button><button class="btn primary" onclick="saveForm('vatpayment')">Save / حفظ</button></div>`;
+  } else if(type==='asset'){
+    fb.innerHTML=`<h3><i class="ti ti-building-bank"></i> Add capital <span class="ar">إضافة رأس مال</span></h3>
+      <div class="form-grid">
+        <div class="fg"><label>Date <span class="ar">التاريخ</span></label><input type="date" id="f-date" value="${new Date().toISOString().slice(0,10)}"/></div>
+        <div class="fg"><label>Amount SAR <span class="ar">المبلغ</span></label><input type="number" id="f-cap-amount" placeholder="0" step="0.01"/></div>
+        <div class="fg full"><label>Note <span class="ar">ملاحظة</span></label><input type="text" id="f-cap-note" placeholder="e.g. Capital injection / زيادة رأس مال"/></div>
+      </div>
+      <div class="form-actions"><button class="btn" onclick="closeForm()">Cancel / إلغاء</button><button class="btn primary" onclick="saveForm('asset')">Save / حفظ</button></div>`;
+  } else if(type==='distribution'){
+    fb.innerHTML=`<h3><i class="ti ti-cash"></i> Add distribution <span class="ar">إضافة توزيع أرباح</span></h3>
+      <div class="form-grid">
+        <div class="fg"><label>Date <span class="ar">التاريخ</span></label><input type="date" id="f-date" value="${new Date().toISOString().slice(0,10)}"/></div>
+        <div class="fg"><label>Amount SAR <span class="ar">المبلغ</span></label><input type="number" id="f-cap-amount" placeholder="0" step="0.01"/></div>
+        <div class="fg full"><label>Note <span class="ar">ملاحظة</span></label><input type="text" id="f-cap-note" placeholder="Optional / اختياري"/></div>
+      </div>
+      <div class="form-actions"><button class="btn" onclick="closeForm()">Cancel / إلغاء</button><button class="btn primary" onclick="saveForm('distribution')">Save / حفظ</button></div>`;
+  } else {
+    fb.innerHTML=`<h3><i class="ti ti-building"></i> Add project <span class="ar">إضافة مشروع / مورد</span></h3>
+      <p style="font-size:12px;color:#888;margin-bottom:12px">Projects are auto-created when you add income or expenses. You can also pre-register a name here.<br><span style="font-style:italic">المشاريع تُنشأ تلقائياً عند إضافة إيراد أو مصروف. يمكنك أيضاً تسجيل اسم مسبقاً.</span></p>
+      <div class="form-grid">
+        <div class="fg full"><label>Name <span class="ar">الاسم</span></label><input type="text" id="f-pname" placeholder="Project or supplier name / اسم المشروع أو المورد"/></div>
+        <div class="fg full"><label>Notes <span class="ar">ملاحظات</span></label><textarea id="f-pnotes" placeholder="Optional / اختياري"></textarea></div>
+      </div>
+      <div class="form-actions"><button class="btn" onclick="closeForm()">Cancel / إلغاء</button><button class="btn primary" onclick="closeForm()">OK</button></div>`;
+  }
+}
+
+function closeForm(){document.getElementById('form-overlay').classList.remove('open')}
+document.getElementById('form-overlay').addEventListener('click',e=>{if(e.target===e.currentTarget)closeForm()});
+
+function saveForm(type){
+  if(type==='asset'||type==='distribution'){
+    const amt=parseFloat(document.getElementById('f-cap-amount').value)||0;
+    if(!amt){alert('Please enter an amount / أدخل المبلغ');return;}
+    const rec={
+      id:uid(type==='asset'?'a':'d'),
+      date:document.getElementById('f-date').value,
+      amount:amt,
+      note:document.getElementById('f-cap-note').value||''
+    };
+    if(type==='asset') DB.assets.push(rec);
+    else DB.distributions.push(rec);
+    saveData();closeForm();renderCapital();renderOverview();
+    return;
+  }
+  if(type==='vatpayment'){
+    const amt=parseFloat(document.getElementById('f-vp-amount').value)||0;
+    if(!amt){alert('Please enter the amount / أدخل المبلغ');return;}
+    DB.vatPayments.push({
+      id:uid('vp'),
+      date:document.getElementById('f-date').value,
+      period:document.getElementById('f-vp-period').value||'-',
+      amount:amt,
+      desc:document.getElementById('f-vp-desc').value||'VAT payment to ZATCA'
+    });
+    saveData();closeForm();renderVAT();renderOverview();
+    return;
+  }
+  if(type==='purchase'){
+    const wo=parseFloat(document.getElementById('f-pur-wo').value)||0;
+    const vatInput=document.getElementById('f-pur-vat').value;
+    const vat=vatInput?parseFloat(vatInput):parseFloat((wo*0.15).toFixed(2));
+    if(!wo){alert('Please enter the amount / أدخل المبلغ');return;}
+    DB.purchases.push({
+      id:uid('p'),
+      date:document.getElementById('f-date').value,
+      type:document.getElementById('f-pur-type').value,
+      supplier:document.getElementById('f-supplier').value||'Unknown',
+      wo_vat:wo, vat:vat, total:parseFloat((wo+vat).toFixed(2)),
+      desc:document.getElementById('f-pur-desc').value||'-',
+      status:document.getElementById('f-pur-status').value
+    });
+    saveData();closeForm();renderPurchases();
+    return;
+  }
+  if(type==='income'){
+    const wo=parseFloat(document.getElementById('f-wo').value)||0;
+    const v=parseFloat(document.getElementById('f-vat').value)||0;
+    const newStatus=document.getElementById('f-status').value;
+    const newPaid=newStatus==='Partially Paid'?parseFloat(document.getElementById('f-paid-partial')?.value||0):newStatus==='Paid'?wo+v:0;
+    DB.income.push({id:uid('i'),date:document.getElementById('f-date').value,client:comboVal('f-client')||'Unknown',project:comboVal('f-project-inc')||'',wo_vat:wo,vat:v,total:wo+v,desc:document.getElementById('f-desc').value||'-',status:newStatus,paidAmount:newPaid,sheet:document.getElementById('f-sheet').value});
+  } else {
+    DB.expenses.push({id:uid('e'),date:document.getElementById('f-date').value,client:comboVal('f-client-exp')||'',project:comboVal('f-project')||'',supplier:comboVal('f-supplier')||'',amount:parseFloat(document.getElementById('f-amount').value)||0,desc:document.getElementById('f-desc').value||'-',type:document.getElementById('f-type').value,sheet:document.getElementById('f-sheet').value});
+  }
+  saveData();closeForm();populateSelects();
+  renderOverview();
+  if(type==='income')renderIncome();else renderExpenses();
+  renderProjects();
+}
+
+function togglePartial(val, wrapId){
+  const wrap=document.getElementById(wrapId);
+  if(wrap) wrap.style.display=val==='Partially Paid'?'flex':'none';
+}
+
+function calcAddVAT(){
+  const wo=parseFloat(document.getElementById('f-wo')?.value)||0;
+  const rate=parseFloat(document.getElementById('f-vat-type')?.value||'15');
+  const vatEl=document.getElementById('f-vat');
+  if(vatEl) vatEl.value=parseFloat((wo*rate/100).toFixed(2));
+}
+
+function calcEditVAT(){
+  const wo=parseFloat(document.getElementById('f-wo')?.value)||0;
+  const rate=parseFloat(document.getElementById('f-vat-type-e')?.value||'15');
+  const vatEl=document.getElementById('f-vat');
+  if(vatEl) vatEl.value=parseFloat((wo*rate/100).toFixed(2));
+}
+
+function autoCalcVAT(){
+  const wo=parseFloat(document.getElementById('f-pur-wo')?.value)||0;
+  const vatEl=document.getElementById('f-pur-vat');
+  if(vatEl) vatEl.value=parseFloat((wo*0.15).toFixed(2));
+}
+
+function showPage(id,btn){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(b=>b.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  if(btn)btn.classList.add('active');
+  if(id==='overview')renderOverview();
+  if(id==='projects')renderProjects();
+  if(id==='income')renderIncome();
+  if(id==='expenses')renderExpenses();
+  if(id==='monthly')renderMonthly();
+  if(id==='vat')renderVAT();
+  if(id==='statement'){switchStmtTab('company');}
+  if(id==='data')renderData();
+  if(id==='capital')renderCapital();
+  if(id==='purchases')renderPurchases();
+}
+
+function init(){populateSelects();setProjView('client');renderCapital();renderOverview();renderProjects();renderIncome();renderExpenses();renderPurchases();}
+loadData();init();
+</script>
+</body>
+</html>
