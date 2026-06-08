@@ -110,8 +110,7 @@ tr:hover td{background:#fafaf8}
     Financial Platform
     <span class="topbar-sub">منصة الحسابات</span>
   </div>
-  <div style="display:flex;gap:8px;align-items:center">
-    <span id="sync-status" style="font-size:11px;padding:2px 10px;border-radius:20px;border:1px solid #ddd;color:#888;min-width:90px;text-align:center">⏳</span>
+  <div style="display:flex;gap:8px;align-items:center"><span id="sync-status" style="font-size:11px;padding:2px 8px;border-radius:12px;border:1px solid #ddd;color:#888">...</span>
     <span id="topbar-counts" style="font-size:11px;color:#888"></span>
     <button class="btn primary sm" onclick="showForm('income')"><i class="ti ti-plus"></i> Invoice <span style="font-size:10px;opacity:.8">فاتورة</span></button>
     <button class="btn sm" onclick="showForm('expense')"><i class="ti ti-plus"></i> Expense <span style="font-size:10px;opacity:.8">مصروف</span></button>
@@ -163,14 +162,8 @@ tr:hover td{background:#fafaf8}
   </button>
   <div style="margin-top:16px;border-top:0.5px solid #eee;padding-top:12px">
     <div style="font-size:10px;color:#bbb;padding:0 10px 6px;text-transform:uppercase;letter-spacing:.4px">Data · البيانات</div>
-    <button class="nav-item" onclick="saveHTMLFile()" style="background:#EBF2FB;border-radius:7px">
-      <i class="ti ti-device-floppy" style="color:#185FA5"></i>
-      <div class="nav-label"><div class="en" style="color:#185FA5;font-weight:500">Save File</div><div class="ar" style="color:#185FA5">حفظ الملف بالبيانات</div></div>
-    </button>
-    <button class="nav-item" onclick="sbSave().then(ok=>{setSyncStatus(ok?'☁️ Saved!':'❌ Failed',ok?'#1D9E75':'#D85A30');})" style="background:#EBF2FB;border-radius:8px;margin-bottom:4px">
-      <i class="ti ti-cloud-upload" style="color:#185FA5"></i>
-      <div class="nav-label"><div class="en" style="color:#185FA5;font-weight:600">Save to Cloud</div><div class="ar" style="color:#185FA5;font-size:9px">حفظ على السيرفر</div></div>
-    </button>
+
+    <button class="nav-item" style="background:#EBF2FB;border-radius:8px" onclick="sbSave()"><i class="ti ti-cloud-upload" style="color:#185FA5"></i><div class="nav-label"><div class="en" style="color:#185FA5;font-weight:600">Save Cloud</div><div class="ar" style="color:#185FA5;font-size:9px">حفظ السيرفر</div></div></button>
     <button class="nav-item" onclick="exportData()">
       <i class="ti ti-download"></i>
       <div class="nav-label"><div class="en">Export JSON</div><div class="ar">تصدير البيانات</div></div>
@@ -1015,207 +1008,7 @@ function loadData(){
 }
 function saveData(){localStorage.setItem('fp_db',JSON.stringify(DB));}
 
-function saveHTMLFile(){
-  // Get current HTML
-  let fileHTML = document.documentElement.outerHTML;
 
-  // Build JS for each DB collection
-  const toJS = (obj) => JSON.stringify(obj, null, 2);
-
-  // Replace SEED_I with current income data
-  fileHTML = fileHTML.replace(
-    /const SEED_I = \[[\s\S]*?\];/,
-    'const SEED_I = ' + toJS(DB.income) + ';'
-  );
-
-  // Replace SEED_E with current expenses data
-  fileHTML = fileHTML.replace(
-    /const SEED_E = \[[\s\S]*?\];/,
-    'const SEED_E = ' + toJS(DB.expenses) + ';'
-  );
-
-  // Replace SEED_P with current purchases data
-  fileHTML = fileHTML.replace(
-    /const SEED_P = \[[\s\S]*?\];/,
-    'const SEED_P = ' + toJS(DB.purchases) + ';'
-  );
-
-  // Replace SEED_VP with current VAT payments data
-  fileHTML = fileHTML.replace(
-    /const SEED_VP = \[[\s\S]*?\];/,
-    'const SEED_VP = ' + toJS(DB.vatPayments) + ';'
-  );
-
-  // Replace SEED_ASSETS with current assets data
-  fileHTML = fileHTML.replace(
-    /const SEED_ASSETS = \[[\s\S]*?\];/,
-    'const SEED_ASSETS = ' + toJS(DB.assets||[]) + ';'
-  );
-
-  // Replace SEED_DIST with current distributions data
-  fileHTML = fileHTML.replace(
-    /const SEED_DIST = \[[\s\S]*?\];/,
-    'const SEED_DIST = ' + toJS(DB.distributions||[]) + ';'
-  );
-
-  // Replace SEED_DATA with current masterData
-  if(DB.masterData){
-    fileHTML = fileHTML.replace(
-      /const SEED_DATA = \{[\s\S]*?\};/,
-      'const SEED_DATA = ' + toJS(DB.masterData) + ';'
-    );
-  }
-
-  // Clear localStorage on load so it reads from updated SEED data
-  fileHTML = fileHTML.replace(
-    '
-// ─── SUPABASE ───────────────────────────────────────────────────────────────
-const SB_URL = 'https://jmfhulzgyklljnxsifht.supabase.co';
-const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImptZmh1bHpneWtsbGpueHNpZmh0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA5MTQ4NjUsImV4cCI6MjA5NjQ5MDg2NX0.fy5WOiI_KEcHJhDlN2OI3XCq2LIRJMlwMn8K-oxRkMU';
-const SB_HDR = {
-  'apikey': SB_KEY,
-  'Authorization': 'Bearer ' + SB_KEY,
-  'Content-Type': 'application/json',
-  'Prefer': 'resolution=merge-duplicates'
-};
-
-async function sbSave(){
-  try {
-    const body = JSON.stringify({ key: 'fp_db', value: {
-      income: DB.income, expenses: DB.expenses,
-      purchases: DB.purchases, vatPayments: DB.vatPayments,
-      assets: DB.assets||[], distributions: DB.distributions||[],
-      masterData: DB.masterData||{}
-    }});
-    const r = await fetch(SB_URL+'/rest/v1/fp_data', {method:'POST', headers:SB_HDR, body});
-    return r.ok;
-  } catch(e){ return false; }
-}
-
-async function sbLoad(){
-  try {
-    const r = await fetch(SB_URL+'/rest/v1/fp_data?key=eq.fp_db&select=value', {headers:SB_HDR});
-    const d = await r.json();
-    if(!d.length) return false;
-    const v = d[0].value;
-    DB.income        = v.income        || [];
-    DB.expenses      = v.expenses      || [];
-    DB.purchases     = v.purchases     || SEED_P.map(x=>({...x}));
-    DB.vatPayments   = v.vatPayments   || SEED_VP.map(x=>({...x}));
-    DB.assets        = v.assets        && v.assets.length        ? v.assets        : SEED_ASSETS.map(x=>({...x}));
-    DB.distributions = v.distributions && v.distributions.length ? v.distributions : SEED_DIST.map(x=>({...x}));
-    DB.masterData    = v.masterData    && Object.keys(v.masterData).length ? v.masterData : JSON.parse(JSON.stringify(SEED_DATA));
-    return true;
-  } catch(e){ return false; }
-}
-
-function setSyncStatus(msg, color){
-  const el = document.getElementById('sync-status');
-  if(el){ el.textContent = msg; el.style.color = color; el.style.borderColor = color; }
-}
-
-const _origSaveData = saveData;
-function saveData(){
-  _origSaveData();
-  sbSave().then(ok => setSyncStatus(ok ? '☁️ Saved' : '⚠️ Save failed', ok ? '#1D9E75' : '#D85A30'));
-}
-
-async function startApp(){
-  await new Promise(r => setTimeout(r, 150));
-  setSyncStatus('⏳ Loading...', '#BA7517');
-  const ok = await sbLoad();
-  if(ok){
-    setSyncStatus('☁️ Synced', '#1D9E75');
-  } else {
-    loadData();
-    setSyncStatus('⚠️ Local only', '#D85A30');
-  }
-  init();
-}
-startApp();
-',
-    'localStorage.removeItem(\'fp_db\');
-// ─── SUPABASE ───────────────────────────────────────────────────────────────
-const SB_URL = 'https://jmfhulzgyklljnxsifht.supabase.co';
-const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImptZmh1bHpneWtsbGpueHNpZmh0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA5MTQ4NjUsImV4cCI6MjA5NjQ5MDg2NX0.fy5WOiI_KEcHJhDlN2OI3XCq2LIRJMlwMn8K-oxRkMU';
-const SB_HDR = {
-  'apikey': SB_KEY,
-  'Authorization': 'Bearer ' + SB_KEY,
-  'Content-Type': 'application/json',
-  'Prefer': 'resolution=merge-duplicates'
-};
-
-async function sbSave(){
-  try {
-    const body = JSON.stringify({ key: 'fp_db', value: {
-      income: DB.income, expenses: DB.expenses,
-      purchases: DB.purchases, vatPayments: DB.vatPayments,
-      assets: DB.assets||[], distributions: DB.distributions||[],
-      masterData: DB.masterData||{}
-    }});
-    const r = await fetch(SB_URL+'/rest/v1/fp_data', {method:'POST', headers:SB_HDR, body});
-    return r.ok;
-  } catch(e){ return false; }
-}
-
-async function sbLoad(){
-  try {
-    const r = await fetch(SB_URL+'/rest/v1/fp_data?key=eq.fp_db&select=value', {headers:SB_HDR});
-    const d = await r.json();
-    if(!d.length) return false;
-    const v = d[0].value;
-    DB.income        = v.income        || [];
-    DB.expenses      = v.expenses      || [];
-    DB.purchases     = v.purchases     || SEED_P.map(x=>({...x}));
-    DB.vatPayments   = v.vatPayments   || SEED_VP.map(x=>({...x}));
-    DB.assets        = v.assets        && v.assets.length        ? v.assets        : SEED_ASSETS.map(x=>({...x}));
-    DB.distributions = v.distributions && v.distributions.length ? v.distributions : SEED_DIST.map(x=>({...x}));
-    DB.masterData    = v.masterData    && Object.keys(v.masterData).length ? v.masterData : JSON.parse(JSON.stringify(SEED_DATA));
-    return true;
-  } catch(e){ return false; }
-}
-
-function setSyncStatus(msg, color){
-  const el = document.getElementById('sync-status');
-  if(el){ el.textContent = msg; el.style.color = color; el.style.borderColor = color; }
-}
-
-const _origSaveData = saveData;
-function saveData(){
-  _origSaveData();
-  sbSave().then(ok => setSyncStatus(ok ? '☁️ Saved' : '⚠️ Save failed', ok ? '#1D9E75' : '#D85A30'));
-}
-
-async function startApp(){
-  await new Promise(r => setTimeout(r, 150));
-  setSyncStatus('⏳ Loading...', '#BA7517');
-  const ok = await sbLoad();
-  if(ok){
-    setSyncStatus('☁️ Synced', '#1D9E75');
-  } else {
-    loadData();
-    setSyncStatus('⚠️ Local only', '#D85A30');
-  }
-  init();
-}
-startApp();
-'
-  );
-
-  // Download the file
-  const date = new Date().toISOString().slice(0,10);
-  const time = new Date().toTimeString().slice(0,5).replace(':','-');
-  const filename = 'financial_platform_' + date + '_' + time + '.html';
-  const blob = new Blob([fileHTML], {type: 'text/html;charset=utf-8'});
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = filename;
-  a.click();
-  URL.revokeObjectURL(a.href);
-
-  // Show success message
-  alert('✅ File saved: ' + filename + '\n\nBiyanatك maHfuDa gowa el file nafsoh.\nبياناتك محفوظة جوا الملف نفسه.');
-}
 
 function exportData(){
   const blob=new Blob([JSON.stringify(DB,null,2)],{type:'application/json'});
@@ -2733,72 +2526,7 @@ function showPage(id,btn){
 }
 
 function init(){populateSelects();setProjView('client');renderCapital();renderOverview();renderProjects();renderIncome();renderExpenses();renderPurchases();}
-
-// ─── SUPABASE ───────────────────────────────────────────────────────────────
-const SB_URL = 'https://jmfhulzgyklljnxsifht.supabase.co';
-const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImptZmh1bHpneWtsbGpueHNpZmh0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA5MTQ4NjUsImV4cCI6MjA5NjQ5MDg2NX0.fy5WOiI_KEcHJhDlN2OI3XCq2LIRJMlwMn8K-oxRkMU';
-const SB_HDR = {
-  'apikey': SB_KEY,
-  'Authorization': 'Bearer ' + SB_KEY,
-  'Content-Type': 'application/json',
-  'Prefer': 'resolution=merge-duplicates'
-};
-
-async function sbSave(){
-  try {
-    const body = JSON.stringify({ key: 'fp_db', value: {
-      income: DB.income, expenses: DB.expenses,
-      purchases: DB.purchases, vatPayments: DB.vatPayments,
-      assets: DB.assets||[], distributions: DB.distributions||[],
-      masterData: DB.masterData||{}
-    }});
-    const r = await fetch(SB_URL+'/rest/v1/fp_data', {method:'POST', headers:SB_HDR, body});
-    return r.ok;
-  } catch(e){ return false; }
-}
-
-async function sbLoad(){
-  try {
-    const r = await fetch(SB_URL+'/rest/v1/fp_data?key=eq.fp_db&select=value', {headers:SB_HDR});
-    const d = await r.json();
-    if(!d.length) return false;
-    const v = d[0].value;
-    DB.income        = v.income        || [];
-    DB.expenses      = v.expenses      || [];
-    DB.purchases     = v.purchases     || SEED_P.map(x=>({...x}));
-    DB.vatPayments   = v.vatPayments   || SEED_VP.map(x=>({...x}));
-    DB.assets        = v.assets        && v.assets.length        ? v.assets        : SEED_ASSETS.map(x=>({...x}));
-    DB.distributions = v.distributions && v.distributions.length ? v.distributions : SEED_DIST.map(x=>({...x}));
-    DB.masterData    = v.masterData    && Object.keys(v.masterData).length ? v.masterData : JSON.parse(JSON.stringify(SEED_DATA));
-    return true;
-  } catch(e){ return false; }
-}
-
-function setSyncStatus(msg, color){
-  const el = document.getElementById('sync-status');
-  if(el){ el.textContent = msg; el.style.color = color; el.style.borderColor = color; }
-}
-
-const _origSaveData = saveData;
-function saveData(){
-  _origSaveData();
-  sbSave().then(ok => setSyncStatus(ok ? '☁️ Saved' : '⚠️ Save failed', ok ? '#1D9E75' : '#D85A30'));
-}
-
-async function startApp(){
-  await new Promise(r => setTimeout(r, 150));
-  setSyncStatus('⏳ Loading...', '#BA7517');
-  const ok = await sbLoad();
-  if(ok){
-    setSyncStatus('☁️ Synced', '#1D9E75');
-  } else {
-    loadData();
-    setSyncStatus('⚠️ Local only', '#D85A30');
-  }
-  init();
-}
-startApp();
-
+var SBURL='https://jmfhulzgyklljnxsifht.supabase.co';var SBKEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImptZmh1bHpneWtsbGpueHNpZmh0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA5MTQ4NjUsImV4cCI6MjA5NjQ5MDg2NX0.fy5WOiI_KEcHJhDlN2OI3XCq2LIRJMlwMn8K-oxRkMU';var SBHDR={'apikey':SBKEY,'Authorization':'Bearer '+SBKEY,'Content-Type':'application/json','Prefer':'resolution=merge-duplicates'};function setSS(m,c){var e=document.getElementById('sync-status');if(e){e.textContent=m;e.style.color=c;}}function sbSave(){fetch(SBURL+'/rest/v1/fp_data',{method:'POST',headers:SBHDR,body:JSON.stringify({key:'fp_db',value:{income:DB.income,expenses:DB.expenses,purchases:DB.purchases,vatPayments:DB.vatPayments,assets:DB.assets||[],distributions:DB.distributions||[],masterData:DB.masterData||{}}})}).then(function(r){setSS(r.ok?'Saved':'Fail',r.ok?'#1D9E75':'#D85A30');}).catch(function(){setSS('Offline','#888');});}function sbLoad(){return fetch(SBURL+'/rest/v1/fp_data?key=eq.fp_db&select=value',{headers:SBHDR}).then(function(r){return r.json();}).then(function(d){if(!d.length)return false;var v=d[0].value;DB.income=v.income||[];DB.expenses=v.expenses||[];DB.purchases=v.purchases||SEED_P.map(function(x){return Object.assign({},x);});DB.vatPayments=v.vatPayments||SEED_VP.map(function(x){return Object.assign({},x);});DB.assets=v.assets&&v.assets.length?v.assets:SEED_ASSETS.map(function(x){return Object.assign({},x);});DB.distributions=v.distributions&&v.distributions.length?v.distributions:SEED_DIST.map(function(x){return Object.assign({},x);});DB.masterData=v.masterData&&Object.keys(v.masterData).length?v.masterData:JSON.parse(JSON.stringify(SEED_DATA));return true;}).catch(function(){return false;});}var _sd=saveData;function saveData(){_sd();sbSave();}setSS('Loading...','#BA7517');sbLoad().then(function(ok){  if(ok){    setSS('Synced','#1D9E75');    init();  } else {    loadData();    init();    setSS('Local — press Save Cloud','#D85A30');    setTimeout(function(){      sbSave();    },2000);  }});
 </script>
 </body>
 </html>
