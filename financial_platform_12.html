@@ -99,6 +99,35 @@ tr:hover td{background:#fafaf8}
 .combo-wrap{position:relative;display:flex;flex-direction:column;gap:3px}
 .combo-wrap select{padding:7px 10px;border:0.5px solid #ddd;border-radius:7px;font-size:12px;background:#fff;color:#1a1a18;font-family:inherit}
 .combo-wrap input.combo-free{padding:7px 10px;border:0.5px solid #185FA5;border-radius:7px;font-size:12px;background:#EBF2FB;color:#1a1a18;font-family:inherit;margin-top:3px}
+
+@media print {
+  .sidebar, .topbar, .toolbar, .nav-item,
+  #stmt-toolbar-company, #stmt-toolbar-client,
+  .btn, button, .page:not(.active) {
+    display: none !important;
+  }
+  .main, .content, body, html {
+    margin: 0 !important;
+    padding: 0 !important;
+    background: white !important;
+  }
+  .page.active {
+    display: block !important;
+    padding: 0 !important;
+  }
+  #stmt-print {
+    border: none !important;
+    box-shadow: none !important;
+  }
+  .print-header, .print-footer {
+    display: block !important;
+  }
+}
+.print-header, .print-footer { display: none; }
+@media print { 
+  .print-header, .print-footer { display: block !important; }
+  #print-header-inject, #print-footer-inject { display: block !important; }
+}
 </style>
 </head>
 <body>
@@ -540,6 +569,9 @@ tr:hover td{background:#fafaf8}
       <select onchange="renderStatement()" id="stmt-co-entity" style="min-width:160px;display:none">
         <option value="">All / الكل</option>
       </select>
+      <input type="date" id="stmt-date-from" onchange="renderStatement()" style="font-size:11px;padding:3px 6px;border:0.5px solid #ddd;border-radius:6px;height:28px" title="From date / من تاريخ"/>
+      <span style="font-size:11px;color:#888">—</span>
+      <input type="date" id="stmt-date-to" onchange="renderStatement()" style="font-size:11px;padding:3px 6px;border:0.5px solid #ddd;border-radius:6px;height:28px" title="To date / إلى تاريخ"/>
       <button class="btn sm" onclick="printStatement()"><i class="ti ti-printer"></i> Print / طباعة</button>
     </div>
   </div>
@@ -557,6 +589,9 @@ tr:hover td{background:#fafaf8}
         <option value="">-- Select / اختر --</option>
       </select>
       <select onchange="renderClientStatement()" id="stmt-client-year"><option value="">All periods / كل الفترات</option></select>
+      <input type="date" id="stmt-cl-date-from" onchange="renderClientStatement()" style="font-size:11px;padding:3px 6px;border:0.5px solid #ddd;border-radius:6px;height:28px" title="From date / من تاريخ"/>
+      <span style="font-size:11px;color:#888">—</span>
+      <input type="date" id="stmt-cl-date-to" onchange="renderClientStatement()" style="font-size:11px;padding:3px 6px;border:0.5px solid #ddd;border-radius:6px;height:28px" title="To date / إلى تاريخ"/>
       <button class="btn sm" onclick="printStatement()"><i class="ti ti-printer"></i> Print / طباعة</button>
     </div>
   </div>
@@ -1455,7 +1490,14 @@ function renderClientStatement(){
     return;
   }
 
-  const yrF = r => !yr || r.date.startsWith(yr);
+  const dateFrom = document.getElementById('stmt-date-from')?.value || '';
+  const dateTo   = document.getElementById('stmt-date-to')?.value   || '';
+  const yrF = r => {
+    if(dateFrom && r.date < dateFrom) return false;
+    if(dateTo   && r.date > dateTo)   return false;
+    if(!dateFrom && !dateTo && yr && !r.date.startsWith(yr)) return false;
+    return true;
+  };
 
   // Client statement = invoices ONLY (no expenses shown to client)
   let invoices = [];
@@ -1557,7 +1599,14 @@ function renderStatement(){
   const yr  = document.getElementById('stmt-year').value;
   const type= coFilterType || 'all';
   const entity = document.getElementById('stmt-co-entity')?.value || '';
-  const yrF = r => !yr || r.date.startsWith(yr);
+  const dateFrom = document.getElementById('stmt-date-from')?.value || '';
+  const dateTo   = document.getElementById('stmt-date-to')?.value   || '';
+  const yrF = r => {
+    if(dateFrom && r.date < dateFrom) return false;
+    if(dateTo   && r.date > dateTo)   return false;
+    if(!dateFrom && !dateTo && yr && !r.date.startsWith(yr)) return false;
+    return true;
+  };
   let fi, fe;
   if(type==='all'){
     fi = DB.income.filter(yrF);
@@ -1581,11 +1630,12 @@ function renderStatement(){
   const paid=fi.filter(r=>r.status==='Paid').reduce((s,r)=>s+r.wo_vat,0);
   const pend=fi.filter(r=>r.status==='Pending').reduce((s,r)=>s+r.total,0);
   const netP = ti - te;
+  const isAll = type==='all' && !entity;
   const B = isAll&&!yr ? calcBalances() : null;
   document.getElementById('stmt-content').innerHTML=`
     <div style="background:#fafaf8;border:0.5px solid #eee;border-radius:10px;padding:16px;margin-bottom:14px" id="stmt-print">
       <div style="font-size:11px;font-weight:500;color:#888;margin-bottom:10px;text-transform:uppercase;letter-spacing:.3px">
-        ${proj?proj:'Company (all) / الشركة كاملة'} ${yr?'· '+yr:'· All periods / كل الفترات'}
+        ${entity?entity:'Company (all) / الشركة كاملة'} ${yr?'· '+yr:'· All periods / كل الفترات'}
       </div>
       <div class="stmnt-row"><span class="stmnt-lbl">Income W/O VAT <span class="ar">إيرادات بدون ضريبة</span></span><span style="color:#185FA5">${SAR(ti)}</span></div>
       <div class="stmnt-row"><span class="stmnt-lbl">VAT collected <span class="ar">ضريبة محصلة</span></span><span>${SAR(tv)}</span></div>
@@ -1593,10 +1643,10 @@ function renderStatement(){
       <div class="stmnt-row"><span class="stmnt-lbl" style="padding-right:12px;color:#aaa">— Pending invoices / معلقة</span><span style="color:#BA7517">${SAR(pend)}</span></div>
       <div class="stmnt-row"><span class="stmnt-lbl">Total expenses <span class="ar">إجمالي المصروفات</span></span><span style="color:#D85A30">${SAR(te)}</span></div>
       <div class="stmnt-row total"><span class="stmnt-lbl">Net profit <span class="ar">صافي الربح</span></span><span style="color:${netP>=0?'#1D9E75':'#D85A30'}">${SAR(netP)}</span></div>
-      ${proj?`<div style="background:#EBF2FB;border-radius:6px;padding:8px 10px;margin-top:8px;font-size:11px;color:#185FA5">
-        <i class="ti ti-info-circle"></i> Project filter active: <strong>${proj}</strong> — showing income & expenses for this project only / فلتر المشروع نشط
+      ${entity?`<div style="background:#EBF2FB;border-radius:6px;padding:8px 10px;margin-top:8px;font-size:11px;color:#185FA5">
+        <i class="ti ti-info-circle"></i> Project filter active: <strong>${entity}</strong> — showing income & expenses for this project only / فلتر المشروع نشط
       </div>`:''}
-      ${B&&!proj?`<div style="border-top:0.5px solid #ddd;margin-top:10px;padding-top:10px">
+      ${B&&!entity?`<div style="border-top:0.5px solid #ddd;margin-top:10px;padding-top:10px">
         <div class="stmnt-row"><span class="stmnt-lbl">Assets <span class="ar">رأس المال</span></span><span>${SAR(B.totalAssets)}</span></div>
         <div class="stmnt-row"><span class="stmnt-lbl">Distributions <span class="ar">توزيعات الأرباح</span></span><span style="color:#D85A30">(${SAR(B.totalDist)})</span></div>
         <div class="stmnt-row"><span class="stmnt-lbl">Available Balance <span class="ar">الرصيد المتاح</span></span><span style="color:#185FA5">${SAR(B.availableBalance)}</span></div>
