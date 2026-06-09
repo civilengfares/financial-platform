@@ -6,6 +6,7 @@
 <title>Financial Platform | منصة الحسابات</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.7.0/dist/tabler-icons.min.css"/>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f5f5f3;color:#1a1a18;font-size:13px}
@@ -193,6 +194,10 @@ tr:hover td{background:#fafaf8}
     <div style="font-size:10px;color:#bbb;padding:0 10px 6px;text-transform:uppercase;letter-spacing:.4px">Data · البيانات</div>
 
     <button class="nav-item" style="background:#EBF2FB;border-radius:8px" onclick="sbSave()"><i class="ti ti-cloud-upload" style="color:#185FA5"></i><div class="nav-label"><div class="en" style="color:#185FA5;font-weight:600">Save Cloud</div><div class="ar" style="color:#185FA5;font-size:9px">حفظ السيرفر</div></div></button>
+    <button class="nav-item" onclick="exportToExcel()" style="background:#E8F5E9;border-radius:8px;margin-bottom:4px">
+      <i class="ti ti-file-spreadsheet" style="color:#1B5E20"></i>
+      <div class="nav-label"><div class="en" style="color:#1B5E20;font-weight:600">Export Excel</div><div class="ar" style="color:#1B5E20;font-size:9px">تصدير اكسيل</div></div>
+    </button>
     <button class="nav-item" onclick="exportData()">
       <i class="ti ti-download"></i>
       <div class="nav-label"><div class="en">Export JSON</div><div class="ar">تصدير البيانات</div></div>
@@ -1044,6 +1049,118 @@ function loadData(){
 function saveData(){localStorage.setItem('fp_db',JSON.stringify(DB));sbSave();}
 
 
+
+
+function exportToExcel(){
+  if(typeof XLSX === 'undefined'){alert('Excel library not loaded.');return;}
+  var wb = XLSX.utils.book_new();
+  var f2 = function(v){return parseFloat((v||0).toFixed(2));};
+
+  // ── INCOME ────────────────────────────────────────────────────────────────
+  var iHdr = ['#','Date','Client','Project','W/O VAT','VAT','Total w/VAT','Paid Amount','Remaining','Description','Status','Sheet'];
+  var iRows = DB.income.map(function(r,i){
+    var paid = r.status==='Paid' ? f2(r.total) : r.status==='Partially Paid' ? f2(r.paidAmount||0) : 0;
+    var rem  = r.status==='Pending' ? f2(r.total) : r.status==='Partially Paid' ? f2(r.total-(r.paidAmount||0)) : 0;
+    return [i+1,r.date,r.client||'',r.project||'',f2(r.wo_vat),f2(r.vat),f2(r.total),paid,rem,r.desc||'',r.status||'',r.sheet||''];
+  });
+  var ni = iRows.length; // data rows count (no totals)
+  iRows.push(['','','','Totals →',
+    {f:'SUM(E2:E'+(ni+1)+')'},
+    {f:'SUM(F2:F'+(ni+1)+')'},
+    {f:'SUM(G2:G'+(ni+1)+')'},
+    {f:'SUM(H2:H'+(ni+1)+')'},
+    {f:'SUM(I2:I'+(ni+1)+')'},'','','']);
+  var wsI = XLSX.utils.aoa_to_sheet([iHdr].concat(iRows));
+  wsI['!cols']=[{wch:5},{wch:13},{wch:20},{wch:20},{wch:14},{wch:12},{wch:14},{wch:14},{wch:12},{wch:36},{wch:14},{wch:12}];
+  wsI['!autofilter']={ref:'A1:L1'};
+  XLSX.utils.book_append_sheet(wb, wsI, 'Income الإيرادات');
+
+  // ── EXPENSES ──────────────────────────────────────────────────────────────
+  var eHdr = ['#','Date','Client','Project','Supplier','Amount','Description','Type','Sheet'];
+  var eRows = DB.expenses.map(function(r,i){
+    return [i+1,r.date,r.client||'',r.project||'',r.supplier||'',f2(r.amount),r.desc||'',r.type||'',r.sheet||''];
+  });
+  var ne = eRows.length;
+  eRows.push(['','','','','Totals →',{f:'SUM(F2:F'+(ne+1)+')'},'','','']);
+  var wsE = XLSX.utils.aoa_to_sheet([eHdr].concat(eRows));
+  wsE['!cols']=[{wch:5},{wch:13},{wch:18},{wch:18},{wch:18},{wch:14},{wch:36},{wch:14},{wch:12}];
+  wsE['!autofilter']={ref:'A1:I1'};
+  XLSX.utils.book_append_sheet(wb, wsE, 'Expenses المصروفات');
+
+  // ── PURCHASES ─────────────────────────────────────────────────────────────
+  var pHdr = ['#','Date','Supplier','W/O VAT','VAT Refundable','Total','Description','Status'];
+  var pRows = DB.purchases.map(function(r,i){
+    return [i+1,r.date,r.supplier||'',f2(r.wo_vat),f2(r.vat),f2(r.total),r.desc||'',r.status||''];
+  });
+  var np = pRows.length;
+  pRows.push(['','','Totals →',{f:'SUM(D2:D'+(np+1)+')'},{f:'SUM(E2:E'+(np+1)+')'},{f:'SUM(F2:F'+(np+1)+')'},'','']);
+  var wsP = XLSX.utils.aoa_to_sheet([pHdr].concat(pRows));
+  wsP['!cols']=[{wch:5},{wch:13},{wch:22},{wch:14},{wch:16},{wch:14},{wch:36},{wch:14}];
+  wsP['!autofilter']={ref:'A1:H1'};
+  XLSX.utils.book_append_sheet(wb, wsP, 'Purchases المشتريات');
+
+  // ── VAT ───────────────────────────────────────────────────────────────────
+  var vHdr = ['#','Date','Period','Amount Paid','Description'];
+  var vRows = DB.vatPayments.map(function(r,i){
+    return [i+1,r.date,r.period||'',f2(r.amount),r.desc||''];
+  });
+  var nv = vRows.length;
+  vRows.push(['','','Totals →',{f:'SUM(D2:D'+(nv+1)+')'},'']);
+  var wsV = XLSX.utils.aoa_to_sheet([vHdr].concat(vRows));
+  wsV['!cols']=[{wch:5},{wch:13},{wch:14},{wch:16},{wch:36}];
+  wsV['!autofilter']={ref:'A1:E1'};
+  XLSX.utils.book_append_sheet(wb, wsV, 'VAT الضريبة');
+
+  // ── CAPITAL ───────────────────────────────────────────────────────────────
+  var cHdr = ['#','Type','Date','Amount','Note'];
+  var cRows = [];
+  (DB.assets||[]).forEach(function(r,i){cRows.push([i+1,'Asset رأس مال',r.date,f2(r.amount),r.note||'']);});
+  (DB.distributions||[]).forEach(function(r,i){cRows.push([cRows.length+1,'Distribution توزيع',r.date,f2(r.amount),r.note||'']);});
+  var nc = cRows.length;
+  cRows.push(['','','Totals →',{f:'SUM(D2:D'+(nc+1)+')'},'']);
+  var wsC = XLSX.utils.aoa_to_sheet([cHdr].concat(cRows));
+  wsC['!cols']=[{wch:5},{wch:22},{wch:13},{wch:14},{wch:28}];
+  wsC['!autofilter']={ref:'A1:E1'};
+  XLSX.utils.book_append_sheet(wb, wsC, 'Capital رأس المال');
+
+  // ── SUMMARY (formulas referencing other sheets) ───────────────────────────
+  var sData = [
+    ['THE GIANT DAM FOR CONTRACTING — السد العملاق للمقاولات',''],
+    ['Financial Summary / الملخص المالي', new Date().toLocaleDateString('en-GB')],
+    [''],
+    ['INCOME / الإيرادات','SAR'],
+    ['Total W/O VAT',           {f:"SUM('Income الإيرادات'!E2:E"+(ni+1)+')'}],
+    ['VAT Collected',            {f:"SUM('Income الإيرادات'!F2:F"+(ni+1)+')'}],
+    ['Total with VAT',           {f:"SUM('Income الإيرادات'!G2:G"+(ni+1)+')'}],
+    ['Total Paid / محصّل',       {f:"SUM('Income الإيرادات'!H2:H"+(ni+1)+')'}],
+    ['Remaining / متبقي',        {f:"SUM('Income الإيرادات'!I2:I"+(ni+1)+')'}],
+    [''],
+    ['EXPENSES / المصروفات',''],
+    ['Total Expenses',           {f:"SUM('Expenses المصروفات'!F2:F"+(ne+1)+')'}],
+    [''],
+    ['VAT / الضريبة',''],
+    ['VAT Collected',            {f:'=B6'}],
+    ['VAT on Purchases (refund)', {f:"SUM('Purchases المشتريات'!E2:E"+(np+1)+')'}],
+    ['VAT Paid to Govt',         {f:"SUM('VAT الضريبة'!D2:D"+(nv+1)+')'}],
+    ['VAT Remaining to Pay',     {f:'=MAX(0,B15-B16-B17)'}],
+    [''],
+    ['CAPITAL / رأس المال',''],
+    ['Total Assets',             {f:"SUMIF('Capital رأس المال'!B2:B"+(nc+1)+",'Capital رأس المال'!B"+(nc+2)+",'Capital رأس المال'!D2:D"+(nc+1)+')'}],
+    ['Total Distributions',      {f:"SUMIF('Capital رأس المال'!B2:B"+(nc+1)+",'Capital رأس المال'!B"+(nc+3)+",'Capital رأس المال'!D2:D"+(nc+1)+')'}],
+    [''],
+    ['PROFIT & BALANCE / الأرباح والأرصدة',''],
+    ['Net Profit صافي الربح',           {f:'=B7-B12-B17-B18'}],
+    ['Available Balance الرصيد المتاح', {f:'=B25+B21-B22'}],
+    ['Account Balance رصيد الحساب',    {f:'=(B8-B12)+B21-B22-B17'}],
+  ];
+  var wsS = XLSX.utils.aoa_to_sheet(sData);
+  wsS['!cols']=[{wch:38},{wch:20}];
+  XLSX.utils.book_append_sheet(wb, wsS, 'Summary الملخص');
+  wb.SheetNames=['Summary الملخص'].concat(wb.SheetNames.filter(function(n){return n!=='Summary الملخص';}));
+
+  var date = new Date().toISOString().slice(0,10);
+  XLSX.writeFile(wb, 'GiantDam_Financial_'+date+'.xlsx');
+}
 
 function exportData(){
   const blob=new Blob([JSON.stringify(DB,null,2)],{type:'application/json'});
