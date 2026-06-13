@@ -129,10 +129,60 @@ tr:hover td{background:#fafaf8}
   .print-header, .print-footer { display: block !important; }
   #print-header-inject, #print-footer-inject { display: block !important; }
 }
+
+.login-overlay {
+  position:fixed;top:0;left:0;width:100%;height:100%;
+  background:rgba(15,23,42,0.85);backdrop-filter:blur(6px);
+  display:flex;align-items:center;justify-content:center;
+  z-index:9999;
+}
+.login-box {
+  background:#fff;border-radius:16px;padding:40px;
+  width:360px;box-shadow:0 20px 60px rgba(0,0,0,0.3);
+  text-align:center;
+}
+.login-logo {
+  font-size:24px;font-weight:700;color:#185FA5;margin-bottom:4px;
+}
+.login-sub {
+  font-size:12px;color:#888;margin-bottom:28px;
+}
+.login-box input {
+  width:100%;padding:10px 14px;border:1px solid #ddd;
+  border-radius:8px;font-size:13px;margin-bottom:12px;
+  outline:none;font-family:inherit;box-sizing:border-box;
+}
+.login-box input:focus { border-color:#185FA5; }
+.login-btn {
+  width:100%;padding:11px;background:#185FA5;color:#fff;
+  border:none;border-radius:8px;font-size:14px;font-weight:600;
+  cursor:pointer;font-family:inherit;margin-top:4px;
+}
+.login-btn:hover { background:#1A4A7A; }
+.login-error {
+  color:#D85A30;font-size:12px;margin-top:8px;min-height:18px;
+}
+.login-user-badge {
+  font-size:11px;padding:2px 8px;border-radius:12px;
+  border:1px solid #ddd;color:#888;cursor:pointer;
+}
 </style>
 </head>
 <body>
-<div class="app">
+
+<div class="login-overlay" id="login-overlay">
+  <div class="login-box">
+    <div class="login-logo">🏗️ GD Platform</div>
+    <div class="login-sub">السد العملاق للمقاولات — Financial Platform</div>
+    <input type="text" id="login-user" placeholder="Username / اسم المستخدم" autocomplete="username"/>
+    <input type="password" id="login-pass" placeholder="Password / كلمة المرور" autocomplete="current-password"
+           onkeydown="if(event.key==='Enter')doLogin()"/>
+    <button class="login-btn" onclick="doLogin()">Login / دخول</button>
+    <div class="login-error" id="login-error"></div>
+  </div>
+</div>
+
+<div class="app" id="main-app" style="display:none">
 
 <div class="topbar">
   <div class="topbar-title">
@@ -140,7 +190,8 @@ tr:hover td{background:#fafaf8}
     Financial Platform
     <span class="topbar-sub">منصة الحسابات</span>
   </div>
-  <div style="display:flex;gap:8px;align-items:center"><span id="sync-status" style="font-size:11px;padding:2px 8px;border-radius:12px;border:1px solid #ddd;color:#888">...</span>
+  <div style="display:flex;gap:8px;align-items:center"><span id="user-badge" class="login-user-badge" onclick="doLogout()" title="Logout / خروج">👤</span>
+    <span id="sync-status" style="font-size:11px;padding:2px 8px;border-radius:12px;border:1px solid #ddd;color:#888">...</span>
     <span id="topbar-counts" style="font-size:11px;color:#888"></span>
     <button class="btn primary sm" onclick="showForm('income')"><i class="ti ti-plus"></i> Invoice <span style="font-size:10px;opacity:.8">فاتورة</span></button>
     <button class="btn sm" onclick="showForm('expense')"><i class="ti ti-plus"></i> Expense <span style="font-size:10px;opacity:.8">مصروف</span></button>
@@ -2693,6 +2744,70 @@ function showPage(id,btn){
 }
 
 function init(){populateSelects();setProjView('client');renderCapital();renderOverview();renderProjects();renderIncome();renderExpenses();renderPurchases();}
+
+// ─── AUTH ───────────────────────────────────────────────────────────────────
+var USERS = {
+  'Admin':    {pass:'@GD172',  role:'admin'},
+  'Admin 02': {pass:'@GD2024', role:'viewer'}
+};
+var currentRole = null;
+
+function doLogin(){
+  var u = document.getElementById('login-user').value.trim();
+  var p = document.getElementById('login-pass').value;
+  var err = document.getElementById('login-error');
+  if(USERS[u] && USERS[u].pass === p){
+    currentRole = USERS[u].role;
+    document.getElementById('login-overlay').style.display='none';
+    document.getElementById('main-app').style.display='flex';
+    document.getElementById('user-badge').textContent = '👤 '+u;
+    applyPermissions();
+  } else {
+    err.textContent = 'Wrong username or password / اسم المستخدم أو كلمة المرور غلط';
+    document.getElementById('login-pass').value='';
+  }
+}
+
+function doLogout(){
+  if(!confirm('Logout? / خروج؟')) return;
+  currentRole = null;
+  document.getElementById('login-overlay').style.display='flex';
+  document.getElementById('main-app').style.display='none';
+  document.getElementById('login-user').value='';
+  document.getElementById('login-pass').value='';
+  document.getElementById('login-error').textContent='';
+}
+
+function applyPermissions(){
+  if(currentRole === 'viewer'){
+    // Hide all add/edit/delete buttons and sidebar actions
+    var style = document.getElementById('viewer-style');
+    if(!style){
+      style = document.createElement('style');
+      style.id = 'viewer-style';
+      style.textContent = [
+        '.btn.danger { display:none !important; }',
+        'button[onclick*="showForm"] { display:none !important; }',
+        'button[onclick*="editRec"] { display:none !important; }',
+        'button[onclick*="editPur"] { display:none !important; }',
+        'button[onclick*="editVP"] { display:none !important; }',
+        'button[onclick*="editCap"] { display:none !important; }',
+        'button[onclick*="editDataItem"] { display:none !important; }',
+        'button[onclick*="addDataItem"] { display:none !important; }',
+        'button[onclick*="sbSave"] { display:none !important; }',
+        'button[onclick*="saveHTMLFile"] { display:none !important; }',
+        'button[onclick*="importData"] { display:none !important; }',
+        '.nav-item[onclick*="showForm"] { display:none !important; }',
+      ].join('\n');
+      document.head.appendChild(style);
+    }
+  } else {
+    // Admin - remove viewer restrictions
+    var style = document.getElementById('viewer-style');
+    if(style) style.remove();
+  }
+}
+
 var SBURL='https://jmfhulzgyklljnxsifht.supabase.co';var SBKEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImptZmh1bHpneWtsbGpueHNpZmh0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA5MTQ4NjUsImV4cCI6MjA5NjQ5MDg2NX0.fy5WOiI_KEcHJhDlN2OI3XCq2LIRJMlwMn8K-oxRkMU';var SBHDR={'apikey':SBKEY,'Authorization':'Bearer '+SBKEY,'Content-Type':'application/json','Prefer':'resolution=merge-duplicates'};function setSS(m,c){var e=document.getElementById('sync-status');if(e){e.textContent=m;e.style.color=c;}}function sbSave(){fetch(SBURL+'/rest/v1/fp_data',{method:'POST',headers:SBHDR,body:JSON.stringify({key:'fp_db',updated_at:new Date().toISOString(),value:{income:DB.income,expenses:DB.expenses,purchases:DB.purchases,vatPayments:DB.vatPayments,assets:DB.assets||[],distributions:DB.distributions||[],masterData:DB.masterData||{}}})}).then(function(r){setSS(r.ok?'Saved':'Fail',r.ok?'#1D9E75':'#D85A30');}).catch(function(){setSS('Offline','#888');});}function sbLoad(){return fetch(SBURL+'/rest/v1/fp_data?key=eq.fp_db&select=value',{headers:SBHDR}).then(function(r){return r.json();}).then(function(d){if(!d.length)return false;var v=d[0].value;DB.income=v.income||[];DB.expenses=v.expenses||[];DB.purchases=v.purchases||SEED_P.map(function(x){return Object.assign({},x);});DB.vatPayments=v.vatPayments||SEED_VP.map(function(x){return Object.assign({},x);});DB.assets=v.assets&&v.assets.length?v.assets:SEED_ASSETS.map(function(x){return Object.assign({},x);});DB.distributions=v.distributions&&v.distributions.length?v.distributions:SEED_DIST.map(function(x){return Object.assign({},x);});DB.masterData=v.masterData&&Object.keys(v.masterData).length?v.masterData:JSON.parse(JSON.stringify(SEED_DATA));return true;}).catch(function(){return false;});}setSS('Loading...','#BA7517');sbLoad().then(function(ok){  if(ok){    setSS('Synced','#1D9E75');    init();  } else {    loadData();    init();    setSS('Local — press Save Cloud','#D85A30');    setTimeout(function(){      sbSave();    },2000);  }});
 </script>
 </body>
